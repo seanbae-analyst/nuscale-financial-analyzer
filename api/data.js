@@ -1,15 +1,14 @@
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_KEY
-);
-
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
 
   if (req.method === 'OPTIONS') return res.status(200).end();
+
+  const { createClient } = await import('@supabase/supabase-js');
+  const supabase = createClient(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_KEY
+  );
 
   const { type } = req.query;
 
@@ -20,7 +19,6 @@ export default async function handler(req, res) {
         .select('*')
         .order('filed_date', { ascending: false })
         .limit(10);
-
       if (error) throw error;
       return res.status(200).json({ filings: data || [] });
     }
@@ -32,7 +30,6 @@ export default async function handler(req, res) {
         .order('created_at', { ascending: false })
         .limit(1)
         .single();
-
       if (error && error.code !== 'PGRST116') throw error;
       return res.status(200).json({ signal: data || null });
     }
@@ -43,7 +40,6 @@ export default async function handler(req, res) {
         .select('*')
         .order('created_at', { ascending: false })
         .limit(30);
-
       if (error) throw error;
       return res.status(200).json({ history: data || [] });
     }
@@ -55,7 +51,6 @@ export default async function handler(req, res) {
         .order('filed_date', { ascending: false })
         .limit(1)
         .single();
-
       if (error && error.code !== 'PGRST116') throw error;
       return res.status(200).json({ filing: data || null });
     }
