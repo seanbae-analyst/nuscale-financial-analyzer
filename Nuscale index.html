@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NuScale Power — AI Financial Analyzer</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e14;
+    --surface: #111722;
+    --border: #1e2a3a;
+    --border2: #2a3a4e;
+    --text: #e8edf3;
+    --muted: #6b7f96;
+    --accent: #3d9bff;
+    --green: #2ecc71;
+    --red: #e74c3c;
+    --amber: #f39c12;
+    --teal: #1abc9c;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: 'IBM Plex Sans', sans-serif; min-height: 100vh; }
+
+  /* HEADER */
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 20px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface);
+  }
+  .logo { display: flex; align-items: center; gap: 14px; }
+  .logo-icon {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, #1a4f8a, #3d9bff);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+  }
+  .logo-text { font-size: 16px; font-weight: 600; }
+  .logo-sub { font-size: 11px; color: var(--muted); font-family: 'IBM Plex Mono', monospace; margin-top: 1px; }
+  .header-meta { display: flex; align-items: center; gap: 12px; }
+  .badge { font-size: 11px; font-family: 'IBM Plex Mono', monospace; padding: 4px 10px; border-radius: 4px; border: 1px solid; }
+  .badge-blue { color: var(--accent); border-color: #1a3a5c; background: #0d1f33; }
+  .badge-amber { color: var(--amber); border-color: #3a2e0d; background: #1f190a; }
+
+  /* MAIN */
+  main { max-width: 1100px; margin: 0 auto; padding: 36px 40px; }
+
+  /* TABS */
+  .tabs { display: flex; gap: 0; margin-bottom: 32px; border-bottom: 1px solid var(--border); }
+  .tab { padding: 10px 20px; font-size: 13px; cursor: pointer; background: none; border: none; color: var(--muted); border-bottom: 2px solid transparent; margin-bottom: -1px; font-family: 'IBM Plex Sans', sans-serif; transition: color 0.2s; }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* METRICS */
+  .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 28px; }
+  .metric { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 18px 20px; }
+  .metric-label { font-size: 11px; color: var(--muted); font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.5px; margin-bottom: 8px; }
+  .metric-value { font-size: 26px; font-weight: 500; }
+  .metric-sub { font-size: 12px; margin-top: 6px; font-family: 'IBM Plex Mono', monospace; }
+  .up { color: var(--green); } .down { color: var(--red); } .neutral { color: var(--muted); }
+
+  /* CHARTS GRID */
+  .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+  .chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px; }
+  .chart-title { font-size: 12px; font-family: 'IBM Plex Mono', monospace; color: var(--muted); margin-bottom: 16px; letter-spacing: 0.5px; text-transform: uppercase; }
+
+  /* AI SECTION */
+  .ai-box { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 24px; margin-bottom: 24px; }
+  .ai-box-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  .ai-box-title { font-size: 14px; font-weight: 500; }
+  .quick-btns { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+  .quick-btn {
+    font-size: 12px; padding: 6px 14px;
+    border: 1px solid var(--border2); border-radius: 6px;
+    background: none; cursor: pointer; color: var(--muted);
+    font-family: 'IBM Plex Sans', sans-serif;
+    transition: all 0.2s;
+  }
+  .quick-btn:hover { border-color: var(--accent); color: var(--accent); background: #0d1f33; }
+  .query-row { display: flex; gap: 10px; margin-bottom: 20px; }
+  .query-input {
+    flex: 1; background: var(--bg); border: 1px solid var(--border2); border-radius: 8px;
+    padding: 10px 16px; color: var(--text); font-size: 13px;
+    font-family: 'IBM Plex Sans', sans-serif; outline: none;
+    transition: border-color 0.2s;
+  }
+  .query-input:focus { border-color: var(--accent); }
+  .query-input::placeholder { color: var(--muted); }
+  .run-btn {
+    background: var(--accent); color: #fff; border: none;
+    border-radius: 8px; padding: 10px 20px; font-size: 13px;
+    cursor: pointer; font-family: 'IBM Plex Sans', sans-serif;
+    font-weight: 500; transition: opacity 0.2s;
+    white-space: nowrap;
+  }
+  .run-btn:hover { opacity: 0.85; }
+  .run-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .ai-output {
+    font-size: 14px; line-height: 1.8; color: var(--text);
+    border-top: 1px solid var(--border); padding-top: 18px;
+    min-height: 60px; white-space: pre-wrap;
+  }
+  .ai-output.placeholder { color: var(--muted); font-style: italic; }
+  .ai-output.loading { color: var(--accent); }
+  .cursor {
+    display: inline-block; width: 2px; height: 1em;
+    background: var(--accent); margin-left: 2px;
+    vertical-align: text-bottom;
+    animation: blink 0.7s step-end infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+  /* PEER TABLE */
+  .peer-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .peer-table th { text-align: left; font-size: 11px; font-family: 'IBM Plex Mono', monospace; color: var(--muted); letter-spacing: 0.5px; text-transform: uppercase; padding: 10px 16px; border-bottom: 1px solid var(--border); }
+  .peer-table td { padding: 12px 16px; border-bottom: 1px solid var(--border); }
+  .peer-table tr:last-child td { border-bottom: none; }
+  .peer-table tr:hover td { background: rgba(61,155,255,0.03); }
+  .pill { font-size: 11px; font-family: 'IBM Plex Mono', monospace; padding: 3px 8px; border-radius: 4px; display: inline-block; }
+  .pill-green { background: #0d2e1a; color: var(--green); }
+  .pill-amber { background: #2a1e08; color: var(--amber); }
+  .pill-red { background: #2a0e0e; color: var(--red); }
+
+  /* LEGEND */
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 10px; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); font-family: 'IBM Plex Mono', monospace; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 2px; }
+
+  .hidden { display: none; }
+
+  /* FOOTER */
+  footer { border-top: 1px solid var(--border); margin-top: 40px; padding: 24px 40px; text-align: center; }
+  .footer-text { font-size: 12px; color: var(--muted); font-family: 'IBM Plex Mono', monospace; }
+  .footer-text a { color: var(--accent); text-decoration: none; }
+
+  @media (max-width: 700px) {
+    main { padding: 24px 20px; }
+    header { padding: 16px 20px; }
+    .metrics { grid-template-columns: repeat(2, 1fr); }
+    .charts-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">⚛</div>
+    <div>
+      <div class="logo-text">NuScale Power — AI Financial Analyzer</div>
+      <div class="logo-sub">SEC 10-K Filing Analysis · FY2022–2024</div>
+    </div>
+  </div>
+  <div class="header-meta">
+    <span class="badge badge-blue">Claude AI Powered</span>
+    <span class="badge badge-amber">Pre-Revenue Stage</span>
+  </div>
+</header>
+
+<main>
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('overview', this)">Overview</button>
+    <button class="tab" onclick="switchTab('financials', this)">Financials</button>
+    <button class="tab" onclick="switchTab('peer', this)">Peer Comparison</button>
+    <button class="tab" onclick="switchTab('ai', this)">AI Analysis</button>
+  </div>
+
+  <!-- OVERVIEW -->
+  <div id="tab-overview">
+    <div class="metrics">
+      <div class="metric">
+        <div class="metric-label">Revenue (FY2024)</div>
+        <div class="metric-value">$37M</div>
+        <div class="metric-sub up">▲ +62% YoY</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Net Loss (FY2024)</div>
+        <div class="metric-value" style="color:var(--red);">−$348M</div>
+        <div class="metric-sub down">▼ −93% YoY</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Cash Runway</div>
+        <div class="metric-value">3.7 yrs</div>
+        <div class="metric-sub neutral">~$447M total liquidity</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Cash Burn / yr</div>
+        <div class="metric-value">$108.7M</div>
+        <div class="metric-sub up">▲ −42% vs FY2023</div>
+      </div>
+    </div>
+
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-title">Revenue vs Net Loss ($M)</div>
+        <div class="legend">
+          <span class="legend-item"><span class="legend-dot" style="background:#3d9bff;"></span>Revenue</span>
+          <span class="legend-item"><span class="legend-dot" style="background:#e74c3c;"></span>Net Loss</span>
+        </div>
+        <div style="position:relative;width:100%;height:200px;"><canvas id="c1"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Cash Position & Runway</div>
+        <div class="legend">
+          <span class="legend-item"><span class="legend-dot" style="background:#1abc9c;"></span>Cash ($M)</span>
+          <span class="legend-item"><span class="legend-dot" style="background:#f39c12;"></span>Runway (yrs)</span>
+        </div>
+        <div style="position:relative;width:100%;height:200px;"><canvas id="c2"></canvas></div>
+      </div>
+    </div>
+
+    <div class="ai-box">
+      <div class="ai-box-header">
+        <div class="ai-box-title">AI Executive Summary</div>
+        <span class="badge badge-blue">Claude API</span>
+      </div>
+      <div class="ai-output placeholder" id="overview-output">Click "Run AI Analysis" to generate an executive summary of NuScale's financial position.</div>
+      <div style="margin-top:16px;">
+        <button class="run-btn" id="overview-btn" onclick="runOverview()">Run AI Analysis →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FINANCIALS -->
+  <div id="tab-financials" class="hidden">
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-title">Operating Expenses ($M)</div>
+        <div style="position:relative;width:100%;height:220px;"><canvas id="c3"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Revenue Growth Rate (%)</div>
+        <div style="position:relative;width:100%;height:220px;"><canvas id="c4"></canvas></div>
+      </div>
+    </div>
+    <div class="chart-card" style="margin-bottom:24px;">
+      <div class="chart-title">Cash Position vs Annual Burn Rate ($M)</div>
+      <div class="legend">
+        <span class="legend-item"><span class="legend-dot" style="background:#1abc9c;"></span>Cash Position</span>
+        <span class="legend-item"><span class="legend-dot" style="background:#e74c3c;"></span>Annual Burn</span>
+      </div>
+      <div style="position:relative;width:100%;height:200px;"><canvas id="c5"></canvas></div>
+    </div>
+  </div>
+
+  <!-- PEER COMPARISON -->
+  <div id="tab-peer" class="hidden">
+    <div class="ai-box" style="margin-bottom:20px;">
+      <table class="peer-table">
+        <thead>
+          <tr>
+            <th>Metric (FY2024)</th>
+            <th>NuScale Power (SMR)</th>
+            <th>Oklo Inc.</th>
+            <th>Assessment</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Cash & Equivalents</td><td>$401.6M</td><td>~$275M</td><td><span class="pill pill-green">NuScale Leads</span></td></tr>
+          <tr><td>Total Liquidity</td><td>~$447M</td><td>~$275M</td><td><span class="pill pill-green">NuScale Leads</span></td></tr>
+          <tr><td>Annual Cash Burn</td><td>$108.7M</td><td>~$65M</td><td><span class="pill pill-amber">Oklo More Efficient</span></td></tr>
+          <tr><td>Cash Runway</td><td>~3.7 years</td><td>~4.2 years</td><td><span class="pill pill-amber">Oklo Leads</span></td></tr>
+          <tr><td>NRC Design Approval</td><td>✓ Approved (77 MWe)</td><td>In Progress</td><td><span class="pill pill-green">NuScale Leads</span></td></tr>
+          <tr><td>Commercial Revenue</td><td>$37M (engineering svc)</td><td>None</td><td><span class="pill pill-green">NuScale Leads</span></td></tr>
+          <tr><td>Market Narrative</td><td>Regulatory Leader</td><td>AI/Data Center Play</td><td><span class="pill pill-amber">Oklo Higher Valuation</span></td></tr>
+          <tr><td>Deployment Stage</td><td>Advanced</td><td>Earlier Stage</td><td><span class="pill pill-green">NuScale Leads</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Liquidity Comparison — NuScale vs Oklo ($M)</div>
+      <div class="legend">
+        <span class="legend-item"><span class="legend-dot" style="background:#3d9bff;"></span>Cash</span>
+        <span class="legend-item"><span class="legend-dot" style="background:#e74c3c;"></span>Annual Burn</span>
+      </div>
+      <div style="position:relative;width:100%;height:200px;"><canvas id="c6"></canvas></div>
+    </div>
+  </div>
+
+  <!-- AI ANALYSIS -->
+  <div id="tab-ai" class="hidden">
+    <div class="ai-box">
+      <div class="ai-box-header">
+        <div class="ai-box-title">AI Financial Analysis Engine</div>
+        <span class="badge badge-blue">Powered by Claude API</span>
+      </div>
+      <div class="quick-btns">
+        <button class="quick-btn" onclick="setQ('Analyze NuScale\'s cash burn rate and assess the liquidity risk for investors.')">Liquidity Risk</button>
+        <button class="quick-btn" onclick="setQ('Compare NuScale vs Oklo: which is the better long-term investment and why?')">NuScale vs Oklo</button>
+        <button class="quick-btn" onclick="setQ('What are NuScale\'s key competitive advantages in the SMR industry?')">Competitive Moat</button>
+        <button class="quick-btn" onclick="setQ('Assess NuScale\'s path to profitability and when might they achieve breakeven?')">Path to Profitability</button>
+        <button class="quick-btn" onclick="setQ('What are the top 3 investment risks based on NuScale\'s 10-K filing?')">Top 3 Risks</button>
+        <button class="quick-btn" onclick="setQ('How does AI integration at NuScale (ORNL collaboration) impact their long-term value?')">AI Strategy</button>
+      </div>
+      <div class="query-row">
+        <input class="query-input" id="ai-input" type="text" placeholder="Ask anything about NuScale's financials, strategy, or competitive position..." />
+        <button class="run-btn" id="ai-btn" onclick="runAI()">Analyze →</button>
+      </div>
+      <div class="ai-output placeholder" id="ai-output">Select a quick query above or type your own question to generate AI-powered financial insights.</div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="footer-text">
+    Built with Claude API · Data sourced from NuScale Power SEC 10-K Filings (FY2022–2024) ·
+    <a href="https://github.com/YOUR_USERNAME/nuscale-financial-analyzer" target="_blank">View on GitHub</a>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const SYSTEM = `You are a senior financial analyst specializing in clean energy, nuclear technology, and SMR (Small Modular Reactor) companies. Analyze NuScale Power based on the following verified 10-K SEC filing data:
+
+FINANCIAL DATA (FY2022–2024):
+- Revenue: FY2022=$11.8M | FY2023=$22.8M | FY2024=$37.0M (62% YoY growth)
+- Net Loss: FY2022=−$141.6M | FY2023=−$180.1M | FY2024=−$348.4M
+- Operating Expenses: FY2022=$250M | FY2023=$280M | FY2024=$260M
+- Cash & Equivalents: FY2022=$312M | FY2023=$125.4M | FY2024=$401.6M
+- Cash Burn (operations): FY2022=−$168.2M | FY2023=−$186.3M | FY2024=−$108.7M
+- Cash Runway: FY2022=1.9yrs | FY2023=0.7yrs | FY2024=3.7yrs
+- Total Liquidity (FY2024): ~$447M
+
+COMPANY PROFILE:
+- First SMR developer with U.S. NRC Standard Design Approval (77 MWe module)
+- Pre-commercial stage; revenue from engineering services contracts
+- AI collaboration with Oak Ridge National Laboratory for fuel management optimization
+- Peer comparison: Oklo Inc. (~$275M liquidity, ~$65M burn/yr, no NRC approval, higher market cap)
+- Key risks: commercialization timeline, first-of-a-kind execution, regulatory complexity, capital needs
+
+Respond in English. Be analytical and concise. Use bullet points with specific numbers. Professional tone suitable for a finance/tech portfolio. Max 5 key points.`;
+
+const years = ['FY2022','FY2023','FY2024'];
+const gridColor = 'rgba(255,255,255,0.06)';
+const tickColor = '#6b7f96';
+const baseOpts = {
+  responsive: true, maintainAspectRatio: false,
+  plugins: { legend: { display: false } },
+  scales: {
+    x: { grid: { color: gridColor }, ticks: { color: tickColor, font: { size: 11, family: "'IBM Plex Mono'" } } },
+    y: { grid: { color: gridColor }, ticks: { color: tickColor, font: { size: 11, family: "'IBM Plex Mono'" } } }
+  }
+};
+
+function initCharts() {
+  if (!window.Chart) return;
+  const ids = ['c1','c2','c3','c4','c5','c6'];
+  ids.forEach(id => { const c = Chart.getChart(id); if (c) c.destroy(); });
+
+  new Chart(document.getElementById('c1'), { type: 'bar', data: { labels: years, datasets: [{ data: [11.8,22.8,37], backgroundColor: '#3d9bff' }, { data: [-141.6,-180.1,-348.4], backgroundColor: '#e74c3c' }] }, options: { ...baseOpts, scales: { ...baseOpts.scales, y: { ...baseOpts.scales.y, ticks: { ...baseOpts.scales.y.ticks, callback: v => (v<0?'-':'')+'$'+Math.abs(v)+'M' } } } } });
+
+  new Chart(document.getElementById('c2'), { type: 'line', data: { labels: years, datasets: [{ data: [312,125.4,401.6], borderColor: '#1abc9c', backgroundColor: 'rgba(26,188,156,0.1)', fill: true, tension: 0.3, pointRadius: 5 }, { data: [1.9,0.7,3.7], borderColor: '#f39c12', backgroundColor: 'transparent', yAxisID: 'y2', tension: 0.3, pointRadius: 5 }] }, options: { ...baseOpts, scales: { x: baseOpts.scales.x, y: { ...baseOpts.scales.y, ticks: { ...baseOpts.scales.y.ticks, callback: v => '$'+v+'M' } }, y2: { position:'right', grid:{ drawOnChartArea:false }, ticks:{ color: tickColor, font:{ size:11, family:"'IBM Plex Mono'" }, callback: v => v+'yr' } } } } });
+
+  new Chart(document.getElementById('c3'), { type: 'bar', data: { labels: years, datasets: [{ data: [250,280,260], backgroundColor: ['#1a3a5c','#1e4570','#3d9bff'] }] }, options: { ...baseOpts, scales: { ...baseOpts.scales, y: { ...baseOpts.scales.y, ticks: { ...baseOpts.scales.y.ticks, callback: v => '$'+v+'M' } } } } });
+
+  new Chart(document.getElementById('c4'), { type: 'line', data: { labels: years, datasets: [{ data: [0,93,62], borderColor: '#3d9bff', backgroundColor: 'rgba(61,155,255,0.1)', fill: true, tension: 0.3, pointRadius: 5 }] }, options: { ...baseOpts, scales: { ...baseOpts.scales, y: { ...baseOpts.scales.y, ticks: { ...baseOpts.scales.y.ticks, callback: v => v+'%' } } } } });
+
+  new Chart(document.getElementById('c5'), { type: 'bar', data: { labels: years, datasets: [{ data: [312,125.4,401.6], backgroundColor: '#1abc9c', label: 'Cash' }, { data: [168.2,186.3,108.7], backgroundColor: '#e74c3c', label: 'Burn' }] }, options: { ...baseOpts, scales: { ...baseOpts.scales, y: { ...baseOpts.scales.y, ticks: { ...baseOpts.scales.y.ticks, callback: v => '$'+v+'M' } } } } });
+
+  new Chart(document.getElementById('c6'), { type: 'bar', data: { labels: ['NuScale','Oklo'], datasets: [{ data: [401.6,275], backgroundColor: '#3d9bff', label: 'Cash' }, { data: [108.7,65], backgroundColor: '#e74c3c', label: 'Burn' }] }, options: { ...baseOpts, scales: { ...baseOpts.scales, y: { ...baseOpts.scales.y, ticks: { ...baseOpts.scales.y.ticks, callback: v => '$'+v+'M' } } } } });
+}
+
+function switchTab(name, el) {
+  ['overview','financials','peer','ai'].forEach(t => document.getElementById('tab-'+t).classList.add('hidden'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.remove('hidden');
+  el.classList.add('active');
+  setTimeout(initCharts, 50);
+}
+
+async function streamClaude(prompt, outputEl, btn) {
+  outputEl.className = 'ai-output';
+  outputEl.textContent = '';
+  if (btn) btn.disabled = true;
+
+  const cursor = document.createElement('span');
+  cursor.className = 'cursor';
+  outputEl.appendChild(cursor);
+
+  try {
+    const res = await fetch('/api/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        stream: true,
+        system: SYSTEM,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error?.message || 'API error');
+    }
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop();
+
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        const data = line.slice(6).trim();
+        if (data === '[DONE]') continue;
+        try {
+          const parsed = JSON.parse(data);
+          if (parsed.type === 'content_block_delta' && parsed.delta?.text) {
+            outputEl.insertBefore(document.createTextNode(parsed.delta.text), cursor);
+          }
+        } catch {}
+      }
+    }
+  } catch(e) {
+    outputEl.textContent = 'Error: ' + e.message;
+  } finally {
+    cursor.remove();
+    if (btn) btn.disabled = false;
+  }
+}
+
+async function runOverview() {
+  const el = document.getElementById('overview-output');
+  const btn = document.getElementById('overview-btn');
+  await streamClaude(
+    "Provide a concise executive summary of NuScale Power's financial health and strategic position based on their FY2022-2024 10-K data. Focus on key trends, risks, and opportunities.",
+    el, btn
+  );
+}
+
+function setQ(q) { document.getElementById('ai-input').value = q; }
+
+async function runAI() {
+  const q = document.getElementById('ai-input').value.trim();
+  if (!q) return;
+  await streamClaude(q, document.getElementById('ai-output'), document.getElementById('ai-btn'));
+}
+
+window.addEventListener('load', initCharts);
+</script>
+</body>
+</html>
