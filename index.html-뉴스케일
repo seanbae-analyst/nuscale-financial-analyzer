@@ -1,0 +1,1945 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NuScale Power — AI Financial Analyzer</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e14;
+    --surface: #111722;
+    --border: #1e2a3a;
+    --border2: #2a3a4e;
+    --text: #e8edf3;
+    --muted: #6b7f96;
+    --accent: #3d9bff;
+    --green: #2ecc71;
+    --red: #e74c3c;
+    --amber: #f39c12;
+    --teal: #1abc9c;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: 'IBM Plex Sans', sans-serif; min-height: 100vh; }
+
+  /* HEADER */
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 20px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface);
+  }
+  .logo { display: flex; align-items: center; gap: 14px; }
+  .logo-icon {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, #1a4f8a, #3d9bff);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+  }
+  .logo-text { font-size: 16px; font-weight: 600; }
+  .logo-sub { font-size: 11px; color: var(--muted); font-family: 'IBM Plex Mono', monospace; margin-top: 1px; }
+  .header-meta { display: flex; align-items: center; gap: 12px; }
+  .badge { font-size: 11px; font-family: 'IBM Plex Mono', monospace; padding: 4px 10px; border-radius: 4px; border: 1px solid; }
+  .badge-blue { color: var(--accent); border-color: #1a3a5c; background: #0d1f33; }
+  .badge-amber { color: var(--amber); border-color: #3a2e0d; background: #1f190a; }
+
+  /* MAIN */
+  main { max-width: 1100px; margin: 0 auto; padding: 36px 40px; }
+
+  /* TABS */
+  .tabs { display: flex; gap: 0; margin-bottom: 32px; border-bottom: 1px solid var(--border); }
+  .tab { padding: 10px 20px; font-size: 13px; cursor: pointer; background: none; border: none; color: var(--muted); border-bottom: 2px solid transparent; margin-bottom: -1px; font-family: 'IBM Plex Sans', sans-serif; transition: color 0.2s; }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* METRICS */
+  .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 28px; }
+  .metric { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 18px 20px; }
+  .metric-label { font-size: 11px; color: var(--muted); font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.5px; margin-bottom: 8px; }
+  .metric-value { font-size: 26px; font-weight: 500; }
+  .metric-sub { font-size: 12px; margin-top: 6px; font-family: 'IBM Plex Mono', monospace; }
+  .up { color: var(--green); } .down { color: var(--red); } .neutral { color: var(--muted); }
+
+  /* CHARTS GRID */
+  .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+  .chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px; }
+  .chart-title { font-size: 12px; font-family: 'IBM Plex Mono', monospace; color: var(--muted); margin-bottom: 16px; letter-spacing: 0.5px; text-transform: uppercase; }
+
+  /* AI SECTION */
+  .ai-box { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 24px; margin-bottom: 24px; }
+  .ai-box-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  .ai-box-title { font-size: 14px; font-weight: 500; }
+  .quick-btns { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+  .quick-btn {
+    font-size: 12px; padding: 6px 14px;
+    border: 1px solid var(--border2); border-radius: 6px;
+    background: none; cursor: pointer; color: var(--muted);
+    font-family: 'IBM Plex Sans', sans-serif;
+    transition: all 0.2s;
+  }
+  .quick-btn:hover { border-color: var(--accent); color: var(--accent); background: #0d1f33; }
+  .query-row { display: flex; gap: 10px; margin-bottom: 20px; }
+  .query-input {
+    flex: 1; background: var(--bg); border: 1px solid var(--border2); border-radius: 8px;
+    padding: 10px 16px; color: var(--text); font-size: 13px;
+    font-family: 'IBM Plex Sans', sans-serif; outline: none;
+    transition: border-color 0.2s;
+  }
+  .query-input:focus { border-color: var(--accent); }
+  .query-input::placeholder { color: var(--muted); }
+  .run-btn {
+    background: var(--accent); color: #fff; border: none;
+    border-radius: 8px; padding: 10px 20px; font-size: 13px;
+    cursor: pointer; font-family: 'IBM Plex Sans', sans-serif;
+    font-weight: 500; transition: opacity 0.2s;
+    white-space: nowrap;
+  }
+  .run-btn:hover { opacity: 0.85; }
+  .run-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .ai-output {
+    font-size: 14px; line-height: 1.8; color: var(--text);
+    border-top: 1px solid var(--border); padding-top: 18px;
+    min-height: 60px; white-space: pre-wrap;
+  }
+  .tooltip-wrap { position: relative; display: inline-block; }
+  .tooltip-btn { background: none; border: 1px solid var(--border2); border-radius: 50%; width: 16px; height: 16px; font-size: 10px; color: var(--muted); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; margin-left: 6px; vertical-align: middle; font-family: 'IBM Plex Mono', monospace; }
+  .tooltip-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .tooltip-box { display: none; position: absolute; bottom: 130%; left: 50%; transform: translateX(-50%); background: #1e2a3a; border: 1px solid var(--border2); border-radius: 8px; padding: 10px 14px; font-size: 12px; color: var(--text); line-height: 1.6; width: 220px; z-index: 100; pointer-events: none; }
+  .tooltip-box::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 6px solid transparent; border-top-color: var(--border2); }
+  .tooltip-wrap:hover .tooltip-box { display: block; }
+  .eli5-box { background: #0d1f33; border: 1px solid #1a3a5c; border-radius: 10px; padding: 16px 20px; margin-bottom: 20px; font-size: 14px; line-height: 1.8; color: var(--text); }
+  .eli5-box.placeholder { color: var(--muted); font-style: italic; font-size: 13px; }
+  .ai-output.loading { color: var(--accent); }
+  .cursor {
+    display: inline-block; width: 2px; height: 1em;
+    background: var(--accent); margin-left: 2px;
+    vertical-align: text-bottom;
+    animation: blink 0.7s step-end infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+  /* PEER TABLE */
+  .peer-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .peer-table th { text-align: left; font-size: 11px; font-family: 'IBM Plex Mono', monospace; color: var(--muted); letter-spacing: 0.5px; text-transform: uppercase; padding: 10px 16px; border-bottom: 1px solid var(--border); }
+  .peer-table td { padding: 12px 16px; border-bottom: 1px solid var(--border); }
+  .peer-table tr:last-child td { border-bottom: none; }
+  .peer-table tr:hover td { background: rgba(61,155,255,0.03); }
+  .pill { font-size: 11px; font-family: 'IBM Plex Mono', monospace; padding: 3px 8px; border-radius: 4px; display: inline-block; }
+  .pill-green { background: #0d2e1a; color: var(--green); }
+  .pill-amber { background: #2a1e08; color: var(--amber); }
+  .pill-red { background: #2a0e0e; color: var(--red); }
+
+  /* LEGEND */
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 10px; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); font-family: 'IBM Plex Mono', monospace; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 2px; }
+
+  .hidden { display: none; }
+
+  /* FOOTER */
+  footer { border-top: 1px solid var(--border); margin-top: 40px; padding: 24px 40px; text-align: center; }
+  .footer-text { font-size: 12px; color: var(--muted); font-family: 'IBM Plex Mono', monospace; }
+  .footer-text a { color: var(--accent); text-decoration: none; }
+
+  @media (max-width: 700px) {
+    main { padding: 24px 20px; }
+    header { padding: 16px 20px; }
+    .metrics { grid-template-columns: repeat(2, 1fr); }
+    .charts-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">⚛</div>
+    <div>
+      <div class="logo-text">NuScale Power — AI Financial Analyzer</div>
+      <div class="logo-sub">SEC 10-K Filing Analysis · FY2022–2024</div>
+    </div>
+  </div>
+  <div class="header-meta">
+    <span class="badge badge-blue">Claude AI Powered</span>
+    <span class="badge badge-amber">Pre-Revenue Stage</span>
+  </div>
+</header>
+
+<main>
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('overview', this)">Overview</button>
+    <button class="tab" onclick="switchTab('market', this)">Market Overview</button>
+    <button class="tab" onclick="switchTab('financials', this)">Financials</button>
+    <button class="tab" onclick="switchTab('peer', this)">Peer Comparison</button>
+    <button class="tab" onclick="switchTab('valuation', this)">Valuation</button>
+    <button class="tab" onclick="switchTab('signal', this)">⚡ Investment Signal</button>
+    <button class="tab" onclick="switchTab('portfolio', this)">💼 My Portfolio</button>
+    <button class="tab" onclick="switchTab('ai', this)">AI Analysis</button>
+    <button class="tab" onclick="switchTab('news', this)">News & Catalyst</button>
+  </div>
+
+  <!-- OVERVIEW -->
+  <div id="tab-overview">
+
+    <div class="ai-box" style="margin-bottom:20px;padding:16px 20px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+        <div>
+          <div style="font-size:13px;font-weight:500;margin-bottom:2px;">🤔 New to this?</div>
+          <div style="font-size:12px;color:var(--muted);">Let AI explain this company in plain English</div>
+        </div>
+        <button class="run-btn" id="eli5-btn" onclick="runELI5('overview')">Explain Simply →</button>
+      </div>
+      <div class="eli5-box placeholder" id="eli5-output" style="margin-top:14px;display:none;">Generating explanation...</div>
+    </div>
+
+    <div class="metrics">
+      <div class="metric">
+        <div class="metric-label">
+          Revenue (FY2024)
+          <span class="tooltip-wrap">
+            <button class="tooltip-btn">?</button>
+            <div class="tooltip-box">Total money earned in a year. NuScale earns from engineering services, not reactor sales yet.</div>
+          </span>
+        </div>
+        <div class="metric-value">$37M</div>
+        <div class="metric-sub up">▲ +62% YoY</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">
+          Net Loss (FY2024)
+          <span class="tooltip-wrap">
+            <button class="tooltip-btn">?</button>
+            <div class="tooltip-box">Spent more than earned — common for pre-commercial tech companies investing in R&D.</div>
+          </span>
+        </div>
+        <div class="metric-value" style="color:var(--red);">−$348M</div>
+        <div class="metric-sub down">▼ −93% YoY</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">
+          Cash Runway
+          <span class="tooltip-wrap">
+            <button class="tooltip-btn">?</button>
+            <div class="tooltip-box">How many years the company can operate before running out of cash. 3.7 years means funded through late 2027.</div>
+          </span>
+        </div>
+        <div class="metric-value">3.7 yrs</div>
+        <div class="metric-sub neutral">~$447M total liquidity</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">
+          Cash Burn / yr
+          <span class="tooltip-wrap">
+            <button class="tooltip-btn">?</button>
+            <div class="tooltip-box">Cash spent per year on operations. $108.7M means ~$9M/month. Down 42% vs prior year — improving efficiency.</div>
+          </span>
+        </div>
+        <div class="metric-value">$108.7M</div>
+        <div class="metric-sub up">▲ −42% vs FY2023</div>
+      </div>
+    </div>
+
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-title">Revenue vs Net Loss ($M)</div>
+        <div class="legend">
+          <span class="legend-item"><span class="legend-dot" style="background:#3d9bff;"></span>Revenue</span>
+          <span class="legend-item"><span class="legend-dot" style="background:#e74c3c;"></span>Net Loss</span>
+        </div>
+        <div style="position:relative;width:100%;height:200px;"><canvas id="c1"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Cash Position & Runway</div>
+        <div class="legend">
+          <span class="legend-item"><span class="legend-dot" style="background:#1abc9c;"></span>Cash ($M)</span>
+          <span class="legend-item"><span class="legend-dot" style="background:#f39c12;"></span>Runway (yrs)</span>
+        </div>
+        <div style="position:relative;width:100%;height:200px;"><canvas id="c2"></canvas></div>
+      </div>
+    </div>
+
+    <div class="ai-box">
+      <div class="ai-box-header">
+        <div class="ai-box-title">AI Executive Summary</div>
+        <span class="badge badge-blue">Claude API</span>
+      </div>
+      <div class="ai-output placeholder" id="overview-output">Click "Run AI Analysis" to generate an executive summary of NuScale's financial position.</div>
+      <div style="margin-top:16px;">
+        <button class="run-btn" id="overview-btn" onclick="runOverview()">Run AI Analysis →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MARKET OVERVIEW -->
+  <div id="tab-market" class="hidden">
+
+    <div class="ai-box" style="margin-bottom:20px;padding:16px 20px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+        <div>
+          <div style="font-size:13px;font-weight:500;margin-bottom:2px;">🤔 Unfamiliar with the SMR market?</div>
+          <div style="font-size:12px;color:var(--muted);">Let AI break it down simply</div>
+        </div>
+        <button class="run-btn" onclick="runELI5('market')">Explain Simply →</button>
+      </div>
+      <div class="eli5-box placeholder" id="eli5-market" style="margin-top:14px;display:none;"></div>
+    </div>
+
+    <div class="metrics" style="margin-bottom:24px;">
+      <div class="metric">
+        <div class="metric-label">
+          SMR Market Size (2025)
+          <span class="tooltip-wrap">
+            <button class="tooltip-btn">?</button>
+            <div class="tooltip-box">Total global SMR market size today. Still in early commercialization stage.</div>
+          </span>
+        </div>
+        <div class="metric-value">$6.5B</div>
+        <div class="metric-sub neutral">Global Market</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">
+          2035 Forecast
+          <span class="tooltip-wrap">
+            <button class="tooltip-btn">?</button>
+            <div class="tooltip-box">Projected market size in 10 years. AI data center power demand is the key growth driver.</div>
+          </span>
+        </div>
+        <div class="metric-value" style="color:var(--green);">$23B+</div>
+        <div class="metric-sub up">▲ CAGR ~14%</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">
+          Big Tech Investment
+          <span class="tooltip-wrap">
+            <button class="tooltip-btn">?</button>
+            <div class="tooltip-box">Total nuclear energy investments by Microsoft, Google, Amazon and Meta to power their AI data centers.</div>
+          </span>
+        </div>
+        <div class="metric-value" style="color:var(--accent);">$10B+</div>
+        <div class="metric-sub neutral">MS · Google · Amazon · Meta</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">
+          Global SMR Pipeline
+          <span class="tooltip-wrap">
+            <button class="tooltip-btn">?</button>
+            <div class="tooltip-box">Total capacity of SMR projects currently in development worldwide. Source: Wood Mackenzie.</div>
+          </span>
+        </div>
+        <div class="metric-value" style="color:var(--amber);">47 GW</div>
+        <div class="metric-sub neutral">Dev Pipeline</div>
+      </div>
+    </div>
+
+    <div class="charts-grid" style="margin-bottom:24px;">
+      <div class="chart-card">
+        <div class="chart-title">SMR Market Size Forecast ($B)</div>
+        <div class="legend">
+          <span class="legend-item"><span class="legend-dot" style="background:#3d9bff;"></span>Market Size</span>
+        </div>
+        <div style="position:relative;width:100%;height:220px;"><canvas id="cm1"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Data Center Power Demand Forecast (TWh)</div>
+        <div class="legend">
+          <span class="legend-item"><span class="legend-dot" style="background:#f39c12;"></span>Power Consumption</span>
+        </div>
+        <div style="position:relative;width:100%;height:220px;"><canvas id="cm2"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Big Tech Deals -->
+    <div class="ai-box" style="margin-bottom:24px;">
+      <div style="font-size:11px;color:var(--muted);font-family:'IBM Plex Mono',monospace;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:16px;">Big Tech × Nuclear — Key Deals (2024–2026)</div>
+      <table class="peer-table">
+        <thead>
+          <tr>
+            <th>Company</th>
+            <th>Partner</th>
+            <th>Capacity</th>
+            <th>Details</th>
+            <th>Source</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="pill pill-green">Microsoft</span></td>
+            <td>Constellation Energy</td>
+            <td style="color:var(--green);font-weight:500;">835 MW</td>
+            <td>Three Mile Island restart, 20-year PPA, target 2027</td>
+            <td style="font-size:11px;color:var(--muted);">Microsoft News, 2024</td>
+          </tr>
+          <tr>
+            <td><span class="pill pill-amber">Google</span></td>
+            <td>Kairos Power</td>
+            <td style="color:var(--green);font-weight:500;">500 MW</td>
+            <td>SMR power purchase agreement, 500MW by 2035</td>
+            <td style="font-size:11px;color:var(--muted);">GE Vernova, 2024</td>
+          </tr>
+          <tr>
+            <td><span class="pill pill-amber">Amazon</span></td>
+            <td>X-Energy</td>
+            <td style="color:var(--green);font-weight:500;">5 GW</td>
+            <td>$500M investment, 5GW SMR capacity by 2039</td>
+            <td style="font-size:11px;color:var(--muted);">Amazon, 2024</td>
+          </tr>
+          <tr>
+            <td><span class="pill pill-blue" style="background:#0d1f33;color:#3d9bff;">Meta</span></td>
+            <td>Multiple</td>
+            <td style="color:var(--amber);font-weight:500;">1~4 GW</td>
+            <td>Issued SMR RFP, targeting supply in early 2030s</td>
+            <td style="font-size:11px;color:var(--muted);">Meta, 2024</td>
+          </tr>
+          <tr>
+            <td><span class="pill pill-red">Oracle</span></td>
+            <td>3 undisclosed SMRs</td>
+            <td style="color:var(--green);font-weight:500;">~1 GW</td>
+            <td>Plans gigawatt-scale data center with 3 SMRs, permits secured</td>
+            <td style="font-size:11px;color:var(--muted);">Oracle CEO, 2024</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Growth Drivers -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;">
+      <div class="ai-box">
+        <div style="font-size:11px;color:var(--muted);font-family:'IBM Plex Mono',monospace;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:14px;">🚀 Growth Drivers</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div style="display:flex;gap:12px;align-items:flex-start;">
+            <span style="color:var(--green);font-size:16px;flex-shrink:0;">▲</span>
+            <div><div style="font-size:13px;font-weight:500;margin-bottom:2px;">AI Data Center Power Demand</div><div style="font-size:12px;color:var(--muted);">Goldman Sachs: 85–90 GW of new nuclear needed by 2030 for data centers</div></div>
+          </div>
+          <div style="display:flex;gap:12px;align-items:flex-start;">
+            <span style="color:var(--green);font-size:16px;flex-shrink:0;">▲</span>
+            <div><div style="font-size:13px;font-weight:500;margin-bottom:2px;">Decarbonization Policy</div><div style="font-size:12px;color:var(--muted);">COP28: Pledge to triple global nuclear capacity by 2050</div></div>
+          </div>
+          <div style="display:flex;gap:12px;align-items:flex-start;">
+            <span style="color:var(--green);font-size:16px;flex-shrink:0;">▲</span>
+            <div><div style="font-size:13px;font-weight:500;margin-bottom:2px;">U.S. Policy Tailwinds</div><div style="font-size:12px;color:var(--muted);">Trump admin: Executive orders targeting 400 GW nuclear capacity by 2050</div></div>
+          </div>
+          <div style="display:flex;gap:12px;align-items:flex-start;">
+            <span style="color:var(--green);font-size:16px;flex-shrink:0;">▲</span>
+            <div><div style="font-size:13px;font-weight:500;margin-bottom:2px;">Energy Security</div><div style="font-size:12px;color:var(--muted);">EU REPowerEU: SMRs designated as core energy sovereignty tool</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="ai-box">
+        <div style="font-size:11px;color:var(--muted);font-family:'IBM Plex Mono',monospace;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:14px;">⚠️ Risk Factors</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div style="display:flex;gap:12px;align-items:flex-start;">
+            <span style="color:var(--red);font-size:16px;flex-shrink:0;">▼</span>
+            <div><div style="font-size:13px;font-weight:500;margin-bottom:2px;">Commercialization Timeline</div><div style="font-size:12px;color:var(--muted);">First commercial SMRs expected post-2029. Data centers need power now.</div></div>
+          </div>
+          <div style="display:flex;gap:12px;align-items:flex-start;">
+            <span style="color:var(--red);font-size:16px;flex-shrink:0;">▼</span>
+            <div><div style="font-size:13px;font-weight:500;margin-bottom:2px;">FOAK Cost Risk</div><div style="font-size:12px;color:var(--muted);">First-of-a-kind reactors risk cost overruns. Unit costs expected to fall at scale.</div></div>
+          </div>
+          <div style="display:flex;gap:12px;align-items:flex-start;">
+            <span style="color:var(--red);font-size:16px;flex-shrink:0;">▼</span>
+            <div><div style="font-size:13px;font-weight:500;margin-bottom:2px;">Regulatory Uncertainty</div><div style="font-size:12px;color:var(--muted);">NRC licensing takes 18–24 months. Policy risk from political shifts.</div></div>
+          </div>
+          <div style="display:flex;gap:12px;align-items:flex-start;">
+            <span style="color:var(--amber);font-size:16px;flex-shrink:0;">▶</span>
+            <div><div style="font-size:13px;font-weight:500;margin-bottom:2px;">Intensifying Competition</div><div style="font-size:12px;color:var(--muted);">China's Linglong One SMR targets 2026 commercial ops. 70+ designs competing globally.</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- NuScale Position -->
+    <div class="ai-box" style="margin-bottom:24px;">
+      <div style="font-size:11px;color:var(--muted);font-family:'IBM Plex Mono',monospace;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:16px;">NuScale's Market Position</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+        <div style="background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:14px;">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">Regulatory Moat</div>
+          <div style="font-size:13px;font-weight:500;color:var(--green);">✓ Only NRC Approval</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px;">Only SMR developer with U.S. NRC Standard Design Approval (77 MWe)</div>
+        </div>
+        <div style="background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:14px;">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">Key Partnership</div>
+          <div style="font-size:13px;font-weight:500;color:var(--accent);">TVA + ENTRA1</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px;">Up to 6 GW SMR capacity agreement signed</div>
+        </div>
+        <div style="background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:14px;">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">AI Collaboration</div>
+          <div style="font-size:13px;font-weight:500;color:var(--amber);">ORNL Partnership</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px;">AI-guided nuclear fuel management research with Oak Ridge National Lab</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ai-box">
+      <div class="ai-box-header">
+        <div class="ai-box-title">AI Market Analysis</div>
+        <span class="badge badge-blue">Claude API</span>
+      </div>
+      <div class="ai-output placeholder" id="market-ai-output">Click a button below to run AI-powered market analysis.</div>
+      <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="run-btn" id="market-btn" onclick="runMarketAI('Analyze the SMR market opportunity for NuScale Power. How big is the addressable market and what is NuScale\'s competitive positioning?')">Run Market Analysis →</button>
+        <button class="quick-btn" onclick="runMarketAI('How does AI data center power demand create opportunities for NuScale specifically?')">AI Data Center Opportunity</button>
+        <button class="quick-btn" onclick="runMarketAI('What are the biggest threats to NuScale\'s market position from competitors and timeline risks?')">Competitive Risks</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FINANCIALS -->
+  <div id="tab-financials" class="hidden">
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-title">Operating Expenses ($M)</div>
+        <div style="position:relative;width:100%;height:220px;"><canvas id="c3"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Revenue Growth Rate (%)</div>
+        <div style="position:relative;width:100%;height:220px;"><canvas id="c4"></canvas></div>
+      </div>
+    </div>
+    <div class="chart-card" style="margin-bottom:24px;">
+      <div class="chart-title">Cash Position vs Annual Burn Rate ($M)</div>
+      <div class="legend">
+        <span class="legend-item"><span class="legend-dot" style="background:#1abc9c;"></span>Cash Position</span>
+        <span class="legend-item"><span class="legend-dot" style="background:#e74c3c;"></span>Annual Burn</span>
+      </div>
+      <div style="position:relative;width:100%;height:200px;"><canvas id="c5"></canvas></div>
+    </div>
+  </div>
+
+  <!-- PEER COMPARISON -->
+  <div id="tab-peer" class="hidden">
+    <div class="ai-box" style="margin-bottom:16px;padding:16px 20px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+        <div>
+          <div style="font-size:13px;font-weight:500;margin-bottom:2px;">🤔 Hard to compare these companies?</div>
+          <div style="font-size:12px;color:var(--muted);">Let AI compare all 5 companies in plain terms</div>
+        </div>
+        <button class="run-btn" onclick="runELI5('peer')">Explain Simply →</button>
+      </div>
+      <div class="eli5-box placeholder" id="eli5-peer" style="margin-top:14px;display:none;"></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+      <button class="quick-btn" style="font-size:11px;" onclick="setQ('Compare all 5 nuclear companies: NuScale, Oklo, GE Vernova, BWX Technologies, and Centrus Energy. Which is the best investment?')">AI: Full 5-Company Compare →</button>
+      <button class="quick-btn" style="font-size:11px;" onclick="setQ('Which of these 5 nuclear companies has the strongest path to profitability: NuScale, Oklo, GE Vernova, BWX Technologies, Centrus Energy?')">AI: Profitability Compare →</button>
+    </div>
+    <div class="ai-box" style="margin-bottom:20px; overflow-x:auto;">
+      <table class="peer-table" style="min-width:700px;">
+        <thead>
+          <tr>
+            <th>Metric (FY2024)</th>
+            <th>NuScale (SMR)</th>
+            <th>Oklo (OKLO)</th>
+            <th>GE Vernova (GEV)</th>
+            <th>BWX Tech (BWXT)</th>
+            <th>Centrus (LEU)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Revenue</td>
+            <td>$37M</td>
+            <td>None</td>
+            <td style="color:#2ecc71;font-weight:500;">$34.9B</td>
+            <td>$2.7B</td>
+            <td>$442M</td>
+          </tr>
+          <tr>
+            <td>Net Income / Loss</td>
+            <td style="color:#e74c3c;">−$348M</td>
+            <td style="color:#e74c3c;">−(loss)</td>
+            <td style="color:#2ecc71;font-weight:500;">+$1.6B</td>
+            <td style="color:#2ecc71;">+$282M</td>
+            <td style="color:#2ecc71;">+$73M</td>
+          </tr>
+          <tr>
+            <td>Cash Position</td>
+            <td>$447M</td>
+            <td>~$275M</td>
+            <td>$2.6B (OCF)</td>
+            <td>$500M</td>
+            <td style="color:#2ecc71;font-weight:500;">$671M</td>
+          </tr>
+          <tr>
+            <td>Profitability</td>
+            <td><span class="pill pill-red">Pre-Revenue</span></td>
+            <td><span class="pill pill-red">No Revenue</span></td>
+            <td><span class="pill pill-green">Profitable</span></td>
+            <td><span class="pill pill-green">Profitable</span></td>
+            <td><span class="pill pill-green">Profitable</span></td>
+          </tr>
+          <tr>
+            <td>NRC Approval</td>
+            <td><span class="pill pill-green">✓ Approved</span></td>
+            <td><span class="pill pill-amber">In Progress</span></td>
+            <td><span class="pill pill-green">✓ Legacy</span></td>
+            <td><span class="pill pill-green">✓ Defense</span></td>
+            <td>N/A (Fuel)</td>
+          </tr>
+          <tr>
+            <td>Stage</td>
+            <td>Pre-commercial</td>
+            <td>Early Stage</td>
+            <td style="color:#2ecc71;font-weight:500;">Full Commercial</td>
+            <td style="color:#2ecc71;">Full Commercial</td>
+            <td style="color:#2ecc71;">Commercial</td>
+          </tr>
+          <tr>
+            <td>SMR Focus</td>
+            <td><span class="pill pill-green">Pure Play SMR</span></td>
+            <td><span class="pill pill-green">Pure Play SMR</span></td>
+            <td><span class="pill pill-amber">SMR + Energy</span></td>
+            <td><span class="pill pill-amber">SMR + Defense</span></td>
+            <td><span class="pill pill-amber">SMR Fuel</span></td>
+          </tr>
+          <tr>
+            <td>Market Cap</td>
+            <td>~$4.3B</td>
+            <td>~$3B+</td>
+            <td style="color:#2ecc71;font-weight:500;">~$100B+</td>
+            <td>~$10B</td>
+            <td>~$1B</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-title">Revenue Comparison FY2024 ($B)</div>
+        <div style="position:relative;width:100%;height:220px;"><canvas id="c6"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Net Income / Loss FY2024 ($M)</div>
+        <div style="position:relative;width:100%;height:220px;"><canvas id="c7"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INVESTMENT SIGNAL -->
+  <div id="tab-signal" class="hidden">
+
+    <!-- Disclaimer -->
+    <div style="background:#2a1e08;border:1px solid #5c3d0d;border-radius:10px;padding:14px 20px;margin-bottom:20px;font-size:12px;color:#f39c12;line-height:1.6;">
+      ⚠️ <strong>Disclaimer:</strong> This tool provides AI-generated analysis for educational and research purposes only. It is NOT financial advice. Always do your own research before making any investment decisions.
+    </div>
+
+    <!-- Current Signal Card -->
+    <div class="ai-box" style="margin-bottom:20px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:20px;">
+        <div>
+          <div style="font-size:11px;color:var(--muted);font-family:'IBM Plex Mono',monospace;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:6px;">Current AI Signal — NuScale Power (SMR)</div>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div id="signal-badge" style="font-size:20px;font-weight:500;padding:8px 20px;border-radius:8px;background:#2a1e08;color:#f39c12;border:1px solid #5c3d0d;">— PENDING</div>
+            <div>
+              <div style="font-size:12px;color:var(--muted);" id="signal-date">Not yet analyzed</div>
+              <div style="font-size:12px;color:var(--muted);" id="signal-price">Current price: ~$12</div>
+            </div>
+          </div>
+        </div>
+        <button class="run-btn" id="signal-btn" onclick="runSignal()">⚡ Run Full Signal Analysis →</button>
+      </div>
+
+      <!-- Signal Meters -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;" id="signal-meters">
+        <div style="background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:14px;text-align:center;">
+          <div style="font-size:11px;color:var(--muted);font-family:'IBM Plex Mono',monospace;margin-bottom:8px;">SEC FILINGS</div>
+          <div style="font-size:22px;margin-bottom:4px;" id="meter-sec">—</div>
+          <div style="font-size:11px;color:var(--muted);" id="meter-sec-label">Pending</div>
+        </div>
+        <div style="background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:14px;text-align:center;">
+          <div style="font-size:11px;color:var(--muted);font-family:'IBM Plex Mono',monospace;margin-bottom:8px;">NEWS FLOW</div>
+          <div style="font-size:22px;margin-bottom:4px;" id="meter-news">—</div>
+          <div style="font-size:11px;color:var(--muted);" id="meter-news-label">Pending</div>
+        </div>
+        <div style="background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:14px;text-align:center;">
+          <div style="font-size:11px;color:var(--muted);font-family:'IBM Plex Mono',monospace;margin-bottom:8px;">FINANCIALS</div>
+          <div style="font-size:22px;margin-bottom:4px;" id="meter-fin">—</div>
+          <div style="font-size:11px;color:var(--muted);" id="meter-fin-label">Pending</div>
+        </div>
+        <div style="background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:14px;text-align:center;">
+          <div style="font-size:11px;color:var(--muted);font-family:'IBM Plex Mono',monospace;margin-bottom:8px;">MARKET</div>
+          <div style="font-size:22px;margin-bottom:4px;" id="meter-mkt">—</div>
+          <div style="font-size:11px;color:var(--muted);" id="meter-mkt-label">Pending</div>
+        </div>
+      </div>
+
+      <!-- Signal Output -->
+      <div style="border-top:1px solid var(--border);padding-top:18px;">
+        <div style="font-size:11px;color:var(--muted);font-family:'IBM Plex Mono',monospace;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:12px;">AI Analysis</div>
+        <div class="ai-output placeholder" id="signal-output">Click "Run Full Signal Analysis" to generate a comprehensive investment signal based on real-time SEC filings, news, and financial data.</div>
+      </div>
+    </div>
+
+    <!-- Decision Framework -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
+      <div class="ai-box">
+        <div style="font-size:11px;color:var(--muted);font-family:'IBM Plex Mono',monospace;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:14px;">📈 Conditions to Consider Buying</div>
+        <div style="display:flex;flex-direction:column;gap:8px;font-size:13px;">
+          <div style="display:flex;gap:10px;"><span style="color:var(--green);">✓</span><span>New commercial contract announced (TVA, hyperscaler)</span></div>
+          <div style="display:flex;gap:10px;"><span style="color:var(--green);">✓</span><span>Cash runway extended via equity raise or DOE funding</span></div>
+          <div style="display:flex;gap:10px;"><span style="color:var(--green);">✓</span><span>NRC approval milestone achieved ahead of schedule</span></div>
+          <div style="display:flex;gap:10px;"><span style="color:var(--green);">✓</span><span>Revenue growth acceleration in quarterly filing</span></div>
+          <div style="display:flex;gap:10px;"><span style="color:var(--green);">✓</span><span>Major tech company partnership announced</span></div>
+        </div>
+      </div>
+      <div class="ai-box">
+        <div style="font-size:11px;color:var(--muted);font-family:'IBM Plex Mono',monospace;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:14px;">📉 Conditions to Consider Selling / Waiting</div>
+        <div style="display:flex;flex-direction:column;gap:8px;font-size:13px;">
+          <div style="display:flex;gap:10px;"><span style="color:var(--red);">✗</span><span>Cash runway drops below 2 years without new funding</span></div>
+          <div style="display:flex;gap:10px;"><span style="color:var(--red);">✗</span><span>Key contract cancellation or customer withdrawal</span></div>
+          <div style="display:flex;gap:10px;"><span style="color:var(--red);">✗</span><span>Significant equity dilution announced</span></div>
+          <div style="display:flex;gap:10px;"><span style="color:var(--red);">✗</span><span>Regulatory setback or NRC delay</span></div>
+          <div style="display:flex;gap:10px;"><span style="color:var(--red);">✗</span><span>Competitor achieves commercial deployment first</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Signal Queries -->
+    <div class="ai-box">
+      <div style="font-size:11px;color:var(--muted);font-family:'IBM Plex Mono',monospace;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:14px;">Quick Analysis</div>
+      <div class="quick-btns" style="margin-bottom:16px;">
+        <button class="quick-btn" onclick="runQuickSignal('sec')">📄 Latest SEC Filing Analysis</button>
+        <button class="quick-btn" onclick="runQuickSignal('news')">📰 Breaking News Impact</button>
+        <button class="quick-btn" onclick="runQuickSignal('catalyst')">🎯 Upcoming Catalysts</button>
+        <button class="quick-btn" onclick="runQuickSignal('risk')">⚠️ Current Risk Level</button>
+        <button class="quick-btn" onclick="runQuickSignal('compare')">🔄 vs Oklo Signal</button>
+      </div>
+      <div class="ai-output placeholder" id="quick-signal-output">Select a quick analysis above.</div>
+    </div>
+
+    <!-- Signal Log -->
+    <div class="ai-box" style="margin-top:20px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <div style="font-size:11px;color:var(--muted);font-family:'IBM Plex Mono',monospace;letter-spacing:0.5px;text-transform:uppercase;">Signal History Log</div>
+        <button class="quick-btn" style="font-size:11px;" onclick="addSignalLog()">+ Save Current Signal</button>
+      </div>
+      <div id="signal-log" style="font-size:13px;color:var(--muted);font-style:italic;">No signals saved yet. Run an analysis and save it to track your decision history.</div>
+    </div>
+  </div>
+
+  <!-- MY PORTFOLIO -->
+  <div id="tab-portfolio" class="hidden">
+
+    <!-- Disclaimer -->
+    <div style="background:#2a1e08;border:1px solid #5c3d0d;border-radius:10px;padding:14px 20px;margin-bottom:20px;font-size:12px;color:#f39c12;line-height:1.6;">
+      ⚠️ <strong>Disclaimer:</strong> This is for educational and tracking purposes only. Not financial advice. All investment decisions are your own responsibility.
+    </div>
+
+    <!-- Current Position -->
+    <div class="metrics" style="margin-bottom:24px;">
+      <div class="metric">
+        <div class="metric-label">Avg. Buy Price</div>
+        <div class="metric-value">$24.40</div>
+        <div class="metric-sub neutral">Nov 17, 2025 · 24 shares</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Current Price</div>
+        <div class="metric-value" id="port-current-price">~$10.18</div>
+        <div class="metric-sub down">52-week low zone</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Unrealized P&L</div>
+        <div class="metric-value" style="color:var(--red);" id="port-pnl">-$340</div>
+        <div class="metric-sub down" id="port-pnl-pct">-58.3%</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Break-even Price</div>
+        <div class="metric-value" id="port-breakeven">$24.40</div>
+        <div class="metric-sub neutral" id="port-breakeven-gap">+$14.22 to break even</div>
+      </div>
+    </div>
+
+    <!-- P&L Chart -->
+    <div class="chart-card" style="margin-bottom:24px;">
+      <div class="chart-title">Portfolio Value — Entry vs Now vs Target ($)</div>
+      <div style="position:relative;width:100%;height:200px;"><canvas id="cp1"></canvas></div>
+    </div>
+
+    <!-- DCA Simulator -->
+    <div class="ai-box" style="margin-bottom:24px;">
+      <div class="ai-box-header">
+        <div class="ai-box-title">📉 DCA Simulator — Average Down with $1,000,000 KRW</div>
+        <span class="badge badge-amber">Adjust to simulate</span>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:20px;">Simulate buying more shares with your available ₩1,000,000 seed to lower your average cost.</div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:20px;">
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+              <span style="font-size:12px;color:var(--muted);font-family:'IBM Plex Mono',monospace;">Buy Price ($)</span>
+              <span style="font-size:13px;font-weight:500;color:var(--accent);" id="dca-lbl-price">$10.18</span>
+            </div>
+            <input type="range" min="6" max="20" value="10.18" step="0.01" id="dca-price" oninput="updateDCA()">
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+              <span style="font-size:12px;color:var(--muted);font-family:'IBM Plex Mono',monospace;">Seed Amount (KRW)</span>
+              <span style="font-size:13px;font-weight:500;color:var(--accent);" id="dca-lbl-seed">₩1,000,000</span>
+            </div>
+            <input type="range" min="100000" max="1000000" value="1000000" step="100000" id="dca-seed" oninput="updateDCA()">
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+              <span style="font-size:12px;color:var(--muted);font-family:'IBM Plex Mono',monospace;">USD/KRW Rate</span>
+              <span style="font-size:13px;font-weight:500;color:var(--accent);" id="dca-lbl-rate">₩1,460</span>
+            </div>
+            <input type="range" min="1300" max="1600" value="1460" step="10" id="dca-rate" oninput="updateDCA()">
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div style="background:var(--bg);border:1px solid var(--border2);border-radius:10px;padding:16px;">
+            <div style="font-size:11px;color:var(--muted);font-family:'IBM Plex Mono',monospace;margin-bottom:12px;text-transform:uppercase;letter-spacing:0.5px;">After DCA</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:13px;">
+              <div>
+                <div style="color:var(--muted);font-size:11px;margin-bottom:3px;">Shares Added</div>
+                <div style="font-weight:500;" id="dca-shares">+67 shares</div>
+              </div>
+              <div>
+                <div style="color:var(--muted);font-size:11px;margin-bottom:3px;">Total Shares</div>
+                <div style="font-weight:500;" id="dca-total-shares">91 shares</div>
+              </div>
+              <div>
+                <div style="color:var(--muted);font-size:11px;margin-bottom:3px;">New Avg Cost</div>
+                <div style="font-weight:500;color:var(--green);" id="dca-new-avg">$12.84</div>
+              </div>
+              <div>
+                <div style="color:var(--muted);font-size:11px;margin-bottom:3px;">New Break-even</div>
+                <div style="font-weight:500;color:var(--amber);" id="dca-new-be">$12.84</div>
+              </div>
+              <div>
+                <div style="color:var(--muted);font-size:11px;margin-bottom:3px;">Total Invested</div>
+                <div style="font-weight:500;" id="dca-total-invested">₩1,810,672</div>
+              </div>
+              <div>
+                <div style="color:var(--muted);font-size:11px;margin-bottom:3px;">Break-even Reduction</div>
+                <div style="font-weight:500;color:var(--green);" id="dca-reduction">-47.4%</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="position:relative;width:100%;height:180px;">
+        <canvas id="cp2"></canvas>
+      </div>
+    </div>
+
+    <!-- Exit Strategy Scenarios -->
+    <div class="ai-box" style="margin-bottom:24px;">
+      <div style="font-size:11px;color:var(--muted);font-family:'IBM Plex Mono',monospace;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:16px;">Exit Strategy Scenarios — 24 shares at avg $24.40</div>
+      <table class="peer-table">
+        <thead>
+          <tr>
+            <th>Scenario</th>
+            <th>Target Price</th>
+            <th>Return on Position</th>
+            <th>Total Value</th>
+            <th>Probability</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="pill pill-red">Stop Loss</span></td>
+            <td>$8.00</td>
+            <td style="color:var(--red);">-67.2% (-$392)</td>
+            <td>$192</td>
+            <td style="color:var(--muted);">If fundamentals deteriorate</td>
+          </tr>
+          <tr>
+            <td><span class="pill pill-amber">Break Even</span></td>
+            <td>$24.40</td>
+            <td style="color:var(--muted);">0% ($0)</td>
+            <td>$586</td>
+            <td style="color:var(--amber);">12-18 months (speculative)</td>
+          </tr>
+          <tr>
+            <td><span class="pill pill-amber">Analyst Target</span></td>
+            <td>$20.73</td>
+            <td style="color:var(--amber);">-15.0% (-$88)</td>
+            <td>$497</td>
+            <td style="color:var(--amber);">Avg analyst consensus</td>
+          </tr>
+          <tr>
+            <td><span class="pill pill-green">Bull Case</span></td>
+            <td>$36.56</td>
+            <td style="color:var(--green);">+49.8% (+$292)</td>
+            <td>$878</td>
+            <td style="color:var(--green);">TVA deal + hyperscaler</td>
+          </tr>
+          <tr>
+            <td><span class="pill pill-green">Super Bull</span></td>
+            <td>$52.00</td>
+            <td style="color:var(--green);">+113.1% (+$663)</td>
+            <td>$1,248</td>
+            <td style="color:var(--muted);">Full SMR commercialization</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- AI Strategy Analysis -->
+    <div class="ai-box">
+      <div class="ai-box-header">
+        <div class="ai-box-title">🤖 AI Exit Strategy Advisor</div>
+        <span class="badge badge-blue">Claude API</span>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:16px;">AI analyzes your specific position and suggests personalized exit strategies. Not financial advice.</div>
+      <div class="quick-btns" style="margin-bottom:16px;">
+        <button class="quick-btn" onclick="runPortfolioAI('hold')">📊 Should I Hold?</button>
+        <button class="quick-btn" onclick="runPortfolioAI('dca')">📉 Should I DCA?</button>
+        <button class="quick-btn" onclick="runPortfolioAI('cutloss')">🔴 Should I Cut Loss?</button>
+        <button class="quick-btn" onclick="runPortfolioAI('catalyst')">🎯 What Catalyst Will Save Me?</button>
+        <button class="quick-btn" onclick="runPortfolioAI('timeline')">⏰ How Long to Break Even?</button>
+      </div>
+      <div class="ai-output placeholder" id="portfolio-ai-output">Select a question above to get AI-powered analysis for your specific position.</div>
+    </div>
+  </div>
+
+  <!-- AI ANALYSIS -->
+  <div id="tab-ai" class="hidden">
+    <div class="ai-box">
+      <div class="ai-box-header">
+        <div class="ai-box-title">AI Financial Analysis Engine</div>
+        <span class="badge badge-blue">Powered by Claude API</span>
+      </div>
+      <div class="quick-btns">
+        <button class="quick-btn" onclick="setQ('Analyze NuScale\'s cash burn rate and assess the liquidity risk for investors.')">Liquidity Risk</button>
+        <button class="quick-btn" onclick="setQ('Compare all 5 companies: NuScale, Oklo, GE Vernova, BWX Technologies, Centrus Energy. Which is the best investment?')">5-Company Compare</button>
+        <button class="quick-btn" onclick="setQ('What are NuScale\'s key competitive advantages in the SMR industry vs GE Vernova and BWX Technologies?')">Competitive Moat</button>
+        <button class="quick-btn" onclick="setQ('Assess NuScale\'s path to profitability and when might they achieve breakeven?')">Path to Profitability</button>
+        <button class="quick-btn" onclick="setQ('What are the top 3 investment risks based on NuScale\'s 10-K filing?')">Top 3 Risks</button>
+        <button class="quick-btn" onclick="setQ('How does Centrus Energy\'s HALEU fuel supply position affect the entire SMR ecosystem including NuScale?')">HALEU & Fuel Strategy</button>
+      </div>
+      <div class="query-row">
+        <input class="query-input" id="ai-input" type="text" placeholder="Ask anything about NuScale's financials, strategy, or competitive position..." />
+        <button class="run-btn" id="ai-btn" onclick="runAI()">Analyze →</button>
+      </div>
+      <div class="ai-output placeholder" id="ai-output">Select a quick query above or type your own question to generate AI-powered financial insights.</div>
+    </div>
+  </div>
+
+  <!-- VALUATION -->
+  <div id="tab-valuation" class="hidden">
+    <div class="ai-box" style="margin-bottom:20px;padding:16px 20px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+        <div>
+          <div style="font-size:13px;font-weight:500;margin-bottom:2px;">🤔 Not sure what valuation means?</div>
+          <div style="font-size:12px;color:var(--muted);">Let AI explain if the stock is cheap or expensive</div>
+        </div>
+        <button class="run-btn" onclick="runELI5('valuation')">Explain Simply →</button>
+      </div>
+      <div class="eli5-box placeholder" id="eli5-valuation" style="margin-top:14px;display:none;"></div>
+    </div>
+    <div class="metrics" style="margin-bottom:24px;">
+      <div class="metric">
+        <div class="metric-label">Current Price</div>
+        <div class="metric-value">~$12</div>
+        <div class="metric-sub neutral">NYSE: SMR</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Market Cap</div>
+        <div class="metric-value">~$3.7B</div>
+        <div class="metric-sub neutral">~318M shares</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Price / Sales</div>
+        <div class="metric-value" style="color:var(--red);">62x</div>
+        <div class="metric-sub down">Extremely High</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Analyst Target</div>
+        <div class="metric-value" style="color:var(--green);">$36.56</div>
+        <div class="metric-sub up">▲ +81% upside</div>
+      </div>
+    </div>
+
+    <div class="charts-grid" style="margin-bottom:24px;">
+      <div class="chart-card">
+        <div class="chart-title">P/S Ratio — 5-Company Comparison</div>
+        <div style="position:relative;width:100%;height:220px;"><canvas id="cv1"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Market Cap vs Revenue FY2024 ($B)</div>
+        <div style="position:relative;width:100%;height:220px;"><canvas id="cv2"></canvas></div>
+      </div>
+    </div>
+
+    <div class="ai-box" style="margin-bottom:24px;">
+      <div class="ai-box-header">
+        <div class="ai-box-title">Interactive DCF Model — NuScale Power</div>
+        <span class="badge badge-amber">Adjust Assumptions</span>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:20px;">Adjust the sliders to calculate NuScale's fair value in real time.</div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px;">
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+              <span style="font-size:12px;color:var(--muted);font-family:'IBM Plex Mono',monospace;">Revenue Growth Rate (Yr 1-5)</span>
+              <span style="font-size:13px;font-weight:500;color:var(--accent);" id="lbl-growth">80%</span>
+            </div>
+            <input type="range" min="20" max="200" value="80" step="5" id="sl-growth" oninput="updateDCF()">
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+              <span style="font-size:12px;color:var(--muted);font-family:'IBM Plex Mono',monospace;">Terminal Growth Rate</span>
+              <span style="font-size:13px;font-weight:500;color:var(--accent);" id="lbl-terminal">3%</span>
+            </div>
+            <input type="range" min="1" max="8" value="3" step="0.5" id="sl-terminal" oninput="updateDCF()">
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+              <span style="font-size:12px;color:var(--muted);font-family:'IBM Plex Mono',monospace;">Discount Rate (WACC)</span>
+              <span style="font-size:13px;font-weight:500;color:var(--accent);" id="lbl-wacc">12%</span>
+            </div>
+            <input type="range" min="8" max="20" value="12" step="0.5" id="sl-wacc" oninput="updateDCF()">
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+              <span style="font-size:12px;color:var(--muted);font-family:'IBM Plex Mono',monospace;">Target Net Margin (Year 10)</span>
+              <span style="font-size:13px;font-weight:500;color:var(--accent);" id="lbl-margin">20%</span>
+            </div>
+            <input type="range" min="5" max="40" value="20" step="1" id="sl-margin" oninput="updateDCF()">
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div style="background:var(--bg);border:1px solid var(--border2);border-radius:10px;padding:20px;text-align:center;">
+            <div style="font-size:11px;color:var(--muted);font-family:'IBM Plex Mono',monospace;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:8px;">DCF Fair Value</div>
+            <div style="font-size:42px;font-weight:500;" id="dcf-price">$24</div>
+            <div style="font-size:12px;margin-top:6px;" id="dcf-vs">vs current ~$12 (+100%)</div>
+          </div>
+          <div style="background:var(--bg);border:1px solid var(--border2);border-radius:10px;padding:16px;">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px;">
+              <div>
+                <div style="color:var(--muted);margin-bottom:2px;">Yr 5 Revenue</div>
+                <div style="font-weight:500;" id="dcf-rev5">$400M</div>
+              </div>
+              <div>
+                <div style="color:var(--muted);margin-bottom:2px;">Yr 10 Revenue</div>
+                <div style="font-weight:500;" id="dcf-rev10">$1.2B</div>
+              </div>
+              <div>
+                <div style="color:var(--muted);margin-bottom:2px;">Terminal Value</div>
+                <div style="font-weight:500;" id="dcf-tv">$2.1B</div>
+              </div>
+              <div>
+                <div style="color:var(--muted);margin-bottom:2px;">Implied Upside</div>
+                <div style="font-weight:500;" id="dcf-upside" style="color:var(--green);">+100%</div>
+              </div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;">
+            <button class="quick-btn" style="font-size:11px;text-align:center;" onclick="setDCFScenario('bear')">🐻 Bear</button>
+            <button class="quick-btn" style="font-size:11px;text-align:center;" onclick="setDCFScenario('base')">📊 Base</button>
+            <button class="quick-btn" style="font-size:11px;text-align:center;" onclick="setDCFScenario('bull')">🐂 Bull</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="position:relative;width:100%;height:200px;margin-bottom:16px;">
+        <canvas id="cv-dcf"></canvas>
+      </div>
+      <div style="font-size:11px;color:var(--muted);font-family:'IBM Plex Mono',monospace;">
+        * DCF assumes FY2024 base revenue of $37M. Simplified model for illustrative purposes. Not financial advice.
+      </div>
+    </div>
+
+
+        <div>
+          <div style="font-size:11px;color:var(--muted);font-family:'IBM Plex Mono',monospace;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:12px;">Bull Case Scenarios</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="background:#0d2e1a;border:1px solid #1a5c34;border-radius:8px;padding:12px 16px;">
+              <div style="font-size:12px;color:#2ecc71;font-weight:500;margin-bottom:4px;">Base Case — TVA Deal Executes</div>
+              <div style="font-size:20px;font-weight:500;color:#2ecc71;">$35–45</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:4px;">6 GW SMR capacity secured, 2028 revenue ramp</div>
+            </div>
+            <div style="background:#0d2e1a;border:1px solid #1a5c34;border-radius:8px;padding:12px 16px;">
+              <div style="font-size:12px;color:#2ecc71;font-weight:500;margin-bottom:4px;">Bull Case — Hyperscaler Deals</div>
+              <div style="font-size:20px;font-weight:500;color:#2ecc71;">$60–80</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:4px;">AI data center contracts + international expansion</div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--muted);font-family:'IBM Plex Mono',monospace;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:12px;">Bear Case Scenarios</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="background:#2a0e0e;border:1px solid #5c1a1a;border-radius:8px;padding:12px 16px;">
+              <div style="font-size:12px;color:#e74c3c;font-weight:500;margin-bottom:4px;">Base Bear — Delays Continue</div>
+              <div style="font-size:20px;font-weight:500;color:#e74c3c;">$5–8</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:4px;">No new contracts, cash runway concerns by 2027</div>
+            </div>
+            <div style="background:#2a0e0e;border:1px solid #5c1a1a;border-radius:8px;padding:12px 16px;">
+              <div style="font-size:12px;color:#e74c3c;font-weight:500;margin-bottom:4px;">Bear Case — Capital Raise Dilution</div>
+              <div style="font-size:20px;font-weight:500;color:#e74c3c;">$3–5</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:4px;">Equity dilution + competitor advancement</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="border-top:1px solid var(--border);padding-top:16px;">
+        <div style="font-size:11px;color:var(--muted);font-family:'IBM Plex Mono',monospace;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:12px;">Key Valuation Metrics vs Peers</div>
+        <table class="peer-table">
+          <thead>
+            <tr>
+              <th>Metric</th>
+              <th>NuScale (SMR)</th>
+              <th>GE Vernova (GEV)</th>
+              <th>BWXT</th>
+              <th>Centrus (LEU)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>P/S Ratio</td><td style="color:#e74c3c;">62x</td><td style="color:#2ecc71;">2.9x</td><td style="color:#2ecc71;">3.7x</td><td style="color:#2ecc71;">2.3x</td></tr>
+            <tr><td>Market Cap</td><td>$3.7B</td><td>$100B+</td><td>$10B</td><td>$1B</td></tr>
+            <tr><td>Revenue Growth YoY</td><td style="color:#2ecc71;">+62%</td><td>+5%</td><td>+8%</td><td style="color:#2ecc71;">+38%</td></tr>
+            <tr><td>Profitability</td><td style="color:#e74c3c;">No</td><td style="color:#2ecc71;">Yes (+4.5%)</td><td style="color:#2ecc71;">Yes (+10.4%)</td><td style="color:#2ecc71;">Yes (+16.5%)</td></tr>
+            <tr><td>Analyst Consensus</td><td style="color:#2ecc71;">Buy ($36.56 target)</td><td>Buy</td><td>Buy</td><td>Hold</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="ai-box">
+      <div class="ai-box-header">
+        <div class="ai-box-title">AI Valuation Analysis</div>
+        <span class="badge badge-blue">Claude API</span>
+      </div>
+      <div class="ai-output placeholder" id="val-output">Click to generate AI-powered valuation analysis.</div>
+      <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="run-btn" id="val-btn" onclick="runValuation()">Generate Valuation Analysis →</button>
+        <button class="quick-btn" onclick="runValuationQ('Is NuScale Power overvalued or undervalued at current price of $12? Compare to peers.')">Overvalued?</button>
+        <button class="quick-btn" onclick="runValuationQ('What revenue milestone does NuScale need to justify its $3.7B market cap?')">Justify Market Cap</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEC FILINGS -->
+  <div id="tab-sec" class="hidden">
+    <div class="ai-box" style="margin-bottom:20px;">
+      <div class="ai-box-header">
+        <div class="ai-box-title">Latest SEC Filings — NuScale Power (SMR)</div>
+        <span class="badge badge-blue">Live from SEC EDGAR</span>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+        <button class="quick-btn active-filter" onclick="loadSEC('10-K')" id="btn-10k">10-K (Annual)</button>
+        <button class="quick-btn" onclick="loadSEC('10-Q')" id="btn-10q">10-Q (Quarterly)</button>
+        <button class="quick-btn" onclick="loadSEC('8-K')" id="btn-8k">8-K (Current)</button>
+        <button class="quick-btn" onclick="loadSEC('ALL')" id="btn-all">All Filings</button>
+      </div>
+      <div id="sec-list">
+        <div style="color:var(--muted);font-size:13px;font-style:italic;">Click a filing type to load latest SEC filings...</div>
+      </div>
+    </div>
+
+    <div class="ai-box">
+      <div class="ai-box-header">
+        <div class="ai-box-title">AI Filing Analysis</div>
+        <span class="badge badge-blue">Claude API</span>
+      </div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:12px;">Load filings above, then ask AI to analyze the latest reports.</div>
+      <div class="query-row">
+        <input class="query-input" id="sec-input" type="text" placeholder="e.g. What changed in the latest 10-Q vs previous quarter?" />
+        <button class="run-btn" id="sec-btn" onclick="runSecAI()">Analyze →</button>
+      </div>
+      <div class="ai-output placeholder" id="sec-output">Load SEC filings first, then ask a question.</div>
+    </div>
+  </div>
+  <!-- NEWS & CATALYST -->
+  <div id="tab-news" class="hidden">
+    <div class="ai-box" style="margin-bottom:20px;">
+      <div class="ai-box-header">
+        <div class="ai-box-title">News & Catalyst Monitor</div>
+        <span class="badge badge-blue">AI Web Search</span>
+      </div>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">Real-time news analysis powered by Claude web search. Select a company or topic to get the latest developments.</p>
+      <div class="quick-btns">
+        <button class="quick-btn" onclick="runNews('NuScale Power SMR latest news 2026')">NuScale Latest</button>
+        <button class="quick-btn" onclick="runNews('Oklo nuclear energy news 2026')">Oklo Latest</button>
+        <button class="quick-btn" onclick="runNews('GE Vernova SMR nuclear news 2026')">GE Vernova</button>
+        <button class="quick-btn" onclick="runNews('BWX Technologies nuclear news 2026')">BWXT</button>
+        <button class="quick-btn" onclick="runNews('Centrus Energy HALEU nuclear fuel news 2026')">Centrus</button>
+        <button class="quick-btn" onclick="runNews('SMR small modular reactor industry news catalyst 2026')">SMR Industry</button>
+        <button class="quick-btn" onclick="runNews('nuclear energy AI data center power demand 2026')">AI + Nuclear</button>
+        <button class="quick-btn" onclick="runNews('NuScale Power stock SMR regulatory update 2026')">Regulatory Update</button>
+      </div>
+      <div class="query-row" style="margin-top:16px;">
+        <input class="query-input" id="news-input" type="text" placeholder="e.g. NuScale TVA partnership update 2026..." />
+        <button class="run-btn" id="news-btn" onclick="runNewsCustom()">Search →</button>
+      </div>
+    </div>
+
+    <div class="ai-box">
+      <div class="ai-box-header">
+        <div class="ai-box-title" id="news-title">AI News Analysis</div>
+        <span class="badge badge-amber" id="news-timestamp" style="display:none;"></span>
+      </div>
+      <div class="ai-output placeholder" id="news-output">Select a company above to fetch and analyze the latest news and catalysts.</div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <div class="footer-text">
+    Built with Claude API · Data sourced from NuScale Power SEC 10-K Filings (FY2022–2024) ·
+    <a href="https://github.com/YOUR_USERNAME/nuscale-financial-analyzer" target="_blank">View on GitHub</a>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const SYSTEM = `You are a senior financial analyst specializing in clean energy, nuclear technology, and SMR (Small Modular Reactor) companies. Analyze based on verified SEC 10-K filing data:
+
+NUSCALE POWER (SMR) — FY2022–2024:
+- Revenue: $11.8M → $22.8M → $37M (+62% YoY)
+- Net Loss: −$141.6M → −$180.1M → −$348.4M
+- Cash & Equivalents: $312M → $125.4M → $401.6M
+- Cash Burn: −$168.2M → −$186.3M → −$108.7M/yr
+- Cash Runway: 1.9 → 0.7 → 3.7 years | Total Liquidity: ~$447M
+- First SMR with U.S. NRC Standard Design Approval (77 MWe)
+- AI collaboration with Oak Ridge National Laboratory
+
+OKLO INC. (OKLO) — FY2024:
+- Revenue: None (pre-revenue)
+- Cash: ~$275M | Burn: ~$65M/yr | Runway: ~4.2 years
+- No NRC approval yet | Higher market cap than NuScale
+- Focus: AI/data center power, fast fission microreactors
+
+GE VERNOVA (GEV) — FY2024:
+- Revenue: $34.9B (+5% YoY) | Net Income: +$1.6B (profitable)
+- Operating Cash Flow: $2.6B | Market Cap: ~$100B+
+- SMR via GE Hitachi Nuclear Energy (BWRX-300)
+- First SMR construction permit in Ontario, Canada (2025)
+- Powers ~25% of global electricity through customer equipment
+
+BWX TECHNOLOGIES (BWXT) — FY2024:
+- Revenue: $2.7B (+8% YoY) | Net Income: +$282M (profitable)
+- Cash: ~$500M | Market Cap: ~$10B
+- U.S. Navy nuclear reactor manufacturer + SMR components
+- Project Pele microreactor for U.S. Department of Defense
+- Consistent profitability with strong defense contracts
+
+CENTRUS ENERGY (LEU) — FY2024:
+- Revenue: $442M (+38% YoY) | Net Income: +$73M (profitable)
+- Cash: $671M | Market Cap: ~$1B
+- Only U.S. licensed HALEU (High-Assay Low-Enriched Uranium) producer
+- Essential fuel supplier for advanced SMRs including NuScale
+- $3.6B order book | DOE HALEU contract through 2026+
+
+Respond in English. Be analytical and concise. Use bullet points with specific numbers. Professional tone suitable for a finance/tech portfolio. Max 5 key points.`;
+
+const years = ['FY2022','FY2023','FY2024'];
+const gridColor = 'rgba(255,255,255,0.06)';
+const tickColor = '#6b7f96';
+const baseOpts = {
+  responsive: true, maintainAspectRatio: false,
+  plugins: { legend: { display: false } },
+  scales: {
+    x: { grid: { color: gridColor }, ticks: { color: tickColor, font: { size: 11, family: "'IBM Plex Mono'" } } },
+    y: { grid: { color: gridColor }, ticks: { color: tickColor, font: { size: 11, family: "'IBM Plex Mono'" } } }
+  }
+};
+
+function initCharts() {
+  if (!window.Chart) return;
+  const ids = ['c1','c2','c3','c4','c5','c6'];
+  ids.forEach(id => { const c = Chart.getChart(id); if (c) c.destroy(); });
+
+  new Chart(document.getElementById('c1'), { type: 'bar', data: { labels: years, datasets: [{ data: [11.8,22.8,37], backgroundColor: '#3d9bff' }, { data: [-141.6,-180.1,-348.4], backgroundColor: '#e74c3c' }] }, options: { ...baseOpts, scales: { ...baseOpts.scales, y: { ...baseOpts.scales.y, ticks: { ...baseOpts.scales.y.ticks, callback: v => (v<0?'-':'')+'$'+Math.abs(v)+'M' } } } } });
+
+  new Chart(document.getElementById('c2'), { type: 'line', data: { labels: years, datasets: [{ data: [312,125.4,401.6], borderColor: '#1abc9c', backgroundColor: 'rgba(26,188,156,0.1)', fill: true, tension: 0.3, pointRadius: 5 }, { data: [1.9,0.7,3.7], borderColor: '#f39c12', backgroundColor: 'transparent', yAxisID: 'y2', tension: 0.3, pointRadius: 5 }] }, options: { ...baseOpts, scales: { x: baseOpts.scales.x, y: { ...baseOpts.scales.y, ticks: { ...baseOpts.scales.y.ticks, callback: v => '$'+v+'M' } }, y2: { position:'right', grid:{ drawOnChartArea:false }, ticks:{ color: tickColor, font:{ size:11, family:"'IBM Plex Mono'" }, callback: v => v+'yr' } } } } });
+
+  new Chart(document.getElementById('c3'), { type: 'bar', data: { labels: years, datasets: [{ data: [250,280,260], backgroundColor: ['#1a3a5c','#1e4570','#3d9bff'] }] }, options: { ...baseOpts, scales: { ...baseOpts.scales, y: { ...baseOpts.scales.y, ticks: { ...baseOpts.scales.y.ticks, callback: v => '$'+v+'M' } } } } });
+
+  new Chart(document.getElementById('c4'), { type: 'line', data: { labels: years, datasets: [{ data: [0,93,62], borderColor: '#3d9bff', backgroundColor: 'rgba(61,155,255,0.1)', fill: true, tension: 0.3, pointRadius: 5 }] }, options: { ...baseOpts, scales: { ...baseOpts.scales, y: { ...baseOpts.scales.y, ticks: { ...baseOpts.scales.y.ticks, callback: v => v+'%' } } } } });
+
+  new Chart(document.getElementById('c5'), { type: 'bar', data: { labels: years, datasets: [{ data: [312,125.4,401.6], backgroundColor: '#1abc9c', label: 'Cash' }, { data: [168.2,186.3,108.7], backgroundColor: '#e74c3c', label: 'Burn' }] }, options: { ...baseOpts, scales: { ...baseOpts.scales, y: { ...baseOpts.scales.y, ticks: { ...baseOpts.scales.y.ticks, callback: v => '$'+v+'M' } } } } });
+
+  new Chart(document.getElementById('c6'), { type: 'bar', data: { labels: ['NuScale','Oklo','GE Vernova','BWXT','Centrus'], datasets: [{ data: [0.037, 0, 34.9, 2.7, 0.442], backgroundColor: ['#3d9bff','#888780','#2ecc71','#1abc9c','#f39c12'] }] }, options: { ...baseOpts, scales: { ...baseOpts.scales, y: { ...baseOpts.scales.y, ticks: { ...baseOpts.scales.y.ticks, callback: v => '$'+v+'B' } } } } });
+
+  if (document.getElementById('c7') && !Chart.getChart('c7')) {
+    new Chart(document.getElementById('c7'), { type: 'bar', data: { labels: ['NuScale','Oklo','GE Vernova','BWXT','Centrus'], datasets: [{ data: [-348, -80, 1600, 282, 73], backgroundColor: v => v.raw >= 0 ? '#2ecc71' : '#e74c3c', backgroundColor: ['#e74c3c','#e74c3c','#2ecc71','#2ecc71','#2ecc71'] }] }, options: { ...baseOpts, scales: { ...baseOpts.scales, y: { ...baseOpts.scales.y, ticks: { ...baseOpts.scales.y.ticks, callback: v => (v<0?'-':'')+'$'+Math.abs(v)+'M' } } } } });
+  }
+  if (document.getElementById('cm1') && !Chart.getChart('cm1')) {
+    new Chart(document.getElementById('cm1'), { type: 'bar', data: { labels: ['2024','2025','2026','2028','2030','2035'], datasets: [{ data: [6.0, 6.5, 7.1, 8.2, 10.7, 23.2], backgroundColor: ['#1a3a5c','#1e4570','#2a5a8a','#3270a8','#3d9bff','#2ecc71'] }] }, options: { ...baseOpts, scales: { ...baseOpts.scales, y: { ...baseOpts.scales.y, ticks: { ...baseOpts.scales.y.ticks, callback: v => '$'+v+'B' } } } } });
+  }
+  if (document.getElementById('cm2') && !Chart.getChart('cm2')) {
+    new Chart(document.getElementById('cm2'), { type: 'line', data: { labels: ['2022','2024','2026','2028','2030','2035'], datasets: [{ data: [460, 600, 900, 1000, 1150, 1300], borderColor: '#f39c12', backgroundColor: 'rgba(243,156,18,0.1)', fill: true, tension: 0.4, pointRadius: 5 }] }, options: { ...baseOpts, scales: { ...baseOpts.scales, y: { ...baseOpts.scales.y, ticks: { ...baseOpts.scales.y.ticks, callback: v => v+'TWh' } } } } });
+  }
+  if (document.getElementById('cv1') && !Chart.getChart('cv1')) {
+    new Chart(document.getElementById('cv1'), { type: 'bar', data: { labels: ['NuScale','GE Vernova','BWXT','Centrus'], datasets: [{ data: [62, 2.9, 3.7, 2.3], backgroundColor: ['#e74c3c','#2ecc71','#1abc9c','#f39c12'] }] }, options: { ...baseOpts, scales: { ...baseOpts.scales, y: { ...baseOpts.scales.y, ticks: { ...baseOpts.scales.y.ticks, callback: v => v+'x' } } } } });
+  }
+  if (document.getElementById('cv2') && !Chart.getChart('cv2')) {
+    new Chart(document.getElementById('cv2'), { type: 'bar', data: { labels: ['NuScale','GE Vernova','BWXT','Centrus'], datasets: [{ label: 'Market Cap ($B)', data: [3.7, 100, 10, 1], backgroundColor: '#3d9bff' }, { label: 'Revenue ($B)', data: [0.037, 34.9, 2.7, 0.442], backgroundColor: '#f39c12' }] }, options: { ...baseOpts, scales: { ...baseOpts.scales, y: { ...baseOpts.scales.y, ticks: { ...baseOpts.scales.y.ticks, callback: v => '$'+v+'B' } } } } });
+  }
+  if (document.getElementById('cp1') && !Chart.getChart('cp1')) {
+    const currentVal = 10.18 * 24;
+    const entryVal = 24.40 * 24;
+    const targetVal = 36.56 * 24;
+    new Chart(document.getElementById('cp1'), {
+      type: 'bar',
+      data: {
+        labels: ['Entry Value', 'Current Value', 'Analyst Target', 'Bull Case'],
+        datasets: [{ data: [entryVal, currentVal, 20.73*24, targetVal], backgroundColor: ['#888780', '#e74c3c', '#f39c12', '#2ecc71'] }]
+      },
+      options: { ...baseOpts, scales: { ...baseOpts.scales, y: { ...baseOpts.scales.y, ticks: { ...baseOpts.scales.y.ticks, callback: v => '$'+Math.round(v) } } } }
+    });
+  }
+}
+
+const PORTFOLIO = {
+  shares: 24,
+  avgCost: 24.40,
+  currentPrice: 10.18,
+  seedKRW: 1000000,
+  entryKRW: 33778
+};
+
+function updateDCA() {
+  const buyPrice = parseFloat(document.getElementById('dca-price')?.value || 10.18);
+  const seedKRW  = parseFloat(document.getElementById('dca-seed')?.value || 1000000);
+  const rate     = parseFloat(document.getElementById('dca-rate')?.value || 1460);
+
+  document.getElementById('dca-lbl-price').textContent = '$' + buyPrice.toFixed(2);
+  document.getElementById('dca-lbl-seed').textContent  = '₩' + seedKRW.toLocaleString();
+  document.getElementById('dca-lbl-rate').textContent  = '₩' + rate.toLocaleString();
+
+  const seedUSD     = seedKRW / rate;
+  const newShares   = Math.floor(seedUSD / buyPrice);
+  const totalShares = PORTFOLIO.shares + newShares;
+  const oldTotal    = PORTFOLIO.shares * PORTFOLIO.avgCost;
+  const newTotal    = newShares * buyPrice;
+  const newAvg      = (oldTotal + newTotal) / totalShares;
+  const reduction   = ((PORTFOLIO.avgCost - newAvg) / PORTFOLIO.avgCost) * 100;
+  const totalInvested = PORTFOLIO.entryKRW * PORTFOLIO.shares + seedKRW;
+
+  document.getElementById('dca-shares').textContent        = '+' + newShares + ' shares';
+  document.getElementById('dca-total-shares').textContent  = totalShares + ' shares';
+  document.getElementById('dca-new-avg').textContent       = '$' + newAvg.toFixed(2);
+  document.getElementById('dca-new-be').textContent        = '$' + newAvg.toFixed(2);
+  document.getElementById('dca-total-invested').textContent = '₩' + totalInvested.toLocaleString();
+  document.getElementById('dca-reduction').textContent     = '-' + reduction.toFixed(1) + '%';
+
+  // Update P&L metrics
+  const pnl = (PORTFOLIO.currentPrice - PORTFOLIO.avgCost) * PORTFOLIO.shares;
+  const pnlPct = ((PORTFOLIO.currentPrice - PORTFOLIO.avgCost) / PORTFOLIO.avgCost) * 100;
+  document.getElementById('port-pnl').textContent = (pnl < 0 ? '-$' : '+$') + Math.abs(pnl).toFixed(0);
+  document.getElementById('port-pnl-pct').textContent = pnlPct.toFixed(1) + '%';
+  document.getElementById('port-breakeven-gap').textContent = '+$' + (PORTFOLIO.avgCost - PORTFOLIO.currentPrice).toFixed(2) + ' to break even';
+
+  // DCA comparison chart
+  const existing = Chart.getChart('cp2');
+  if (existing) existing.destroy();
+  if (document.getElementById('cp2')) {
+    new Chart(document.getElementById('cp2'), {
+      type: 'bar',
+      data: {
+        labels: ['Before DCA', 'After DCA'],
+        datasets: [
+          { label: 'Avg Cost', data: [PORTFOLIO.avgCost, newAvg], backgroundColor: ['#e74c3c', '#2ecc71'] },
+          { label: 'Current Price', data: [PORTFOLIO.currentPrice, PORTFOLIO.currentPrice], backgroundColor: ['#888780', '#888780'] }
+        ]
+      },
+      options: { ...baseOpts, plugins: { legend: { display: false } }, scales: { ...baseOpts.scales, y: { ...baseOpts.scales.y, ticks: { ...baseOpts.scales.y.ticks, callback: v => '$'+v.toFixed(0) } } } }
+    });
+  }
+}
+
+async function runPortfolioAI(type) {
+  const el = document.getElementById('portfolio-ai-output');
+  el.className = 'ai-output';
+  el.textContent = 'Analyzing your position...';
+
+  const positionContext = `My Position in NuScale Power (NYSE: SMR):
+- Entry date: November 17, 2025
+- Entry price: $24.40/share (₩33,778 KRW)
+- Shares held: 24
+- Total invested: ~₩810,672 KRW
+- Current price: ~$10.18
+- Current value: ~$244
+- Unrealized loss: -$341 (-58.3%)
+- Available cash for DCA: ₩1,000,000 KRW (~$685 USD at ₩1,460/USD)
+- 52-week range: $11.08 - $57.42
+- Analyst consensus: Buy, avg target $20.73`;
+
+  const prompts = {
+    hold:     `${positionContext}\n\nGiven my position, should I HOLD my current 24 shares? Analyze: 1) What would make holding the right decision? 2) Key risks of holding. 3) What catalyst would I need to see to justify holding? Give me a clear recommendation.`,
+    dca:      `${positionContext}\n\nShould I use my ₩1,000,000 KRW to buy more shares (DCA/average down)? Analyze: 1) At what price would DCA make sense? 2) How much would it lower my break-even? 3) What's the risk if price drops further? Should I DCA all at once or in stages?`,
+    cutloss:  `${positionContext}\n\nShould I cut my losses now? Analyze: 1) What am I giving up if I sell now? 2) What scenarios make cutting loss the right move? 3) If I sell, what should I do with the remaining capital? Be honest about the opportunity cost.`,
+    catalyst: `${positionContext}\n\nWhat specific catalysts could save my position and bring NuScale back to my break-even of $24.40? Analyze: 1) Most likely near-term catalysts (3-6 months). 2) Timeline for each catalyst. 3) Which catalyst would have the biggest price impact? How realistic is recovery to $24?`,
+    timeline: `${positionContext}\n\nHow long realistically will it take for NuScale to return to my break-even price of $24.40? Give me: 1) Best case timeline. 2) Base case timeline. 3) Worst case scenario. 4) What % chance of reaching $24 within 1 year, 2 years, 3 years?`
+  };
+
+  try {
+    const res = await fetch('/api/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        system: SYSTEM + '\n\nYou are analyzing a specific investor\'s position. Be direct, honest, and practical. This is for educational purposes only — not financial advice.',
+        messages: [{ role: 'user', content: prompts[type] }]
+      })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    el.textContent = data.text;
+    el.className = 'ai-output';
+  } catch(e) {
+    el.textContent = 'Error: ' + e.message;
+  }
+}
+
+function switchTab(name, el) {
+  ['overview','market','financials','peer','valuation','signal','portfolio','ai','sec','news'].forEach(t => document.getElementById('tab-'+t).classList.add('hidden'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.remove('hidden');
+  el.classList.add('active');
+  setTimeout(() => { initCharts(); if (name === 'valuation') updateDCF(); if (name === 'portfolio') updateDCA(); }, 50);
+}
+
+let signalLog = [];
+
+function setSignalMeter(id, labelId, sentiment) {
+  const el = document.getElementById(id);
+  const label = document.getElementById(labelId);
+  const map = {
+    bullish:  { icon: '🟢', text: 'Bullish',  color: '#2ecc71' },
+    neutral:  { icon: '🟡', text: 'Neutral',  color: '#f39c12' },
+    bearish:  { icon: '🔴', text: 'Bearish',  color: '#e74c3c' },
+    mixed:    { icon: '🟠', text: 'Mixed',    color: '#e67e22' },
+  };
+  const s = map[sentiment] || map.neutral;
+  el.textContent = s.icon;
+  label.textContent = s.text;
+  label.style.color = s.color;
+}
+
+function setOverallSignal(signal) {
+  const badge = document.getElementById('signal-badge');
+  const map = {
+    BUY:  { text: '🟢 BUY',  bg: '#0d2e1a', color: '#2ecc71', border: '#1a5c34' },
+    HOLD: { text: '🟡 HOLD', bg: '#2a1e08', color: '#f39c12', border: '#5c3d0d' },
+    WAIT: { text: '🟠 WAIT', bg: '#2a1608', color: '#e67e22', border: '#5c3010' },
+    SELL: { text: '🔴 SELL', bg: '#2a0e0e', color: '#e74c3c', border: '#5c1a1a' },
+  };
+  const s = map[signal] || map.HOLD;
+  badge.textContent = s.text;
+  badge.style.background = s.bg;
+  badge.style.color = s.color;
+  badge.style.border = `1px solid ${s.border}`;
+  document.getElementById('signal-date').textContent = 'Last updated: ' + new Date().toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
+}
+
+async function runSignal() {
+  const btn = document.getElementById('signal-btn');
+  const out = document.getElementById('signal-output');
+  btn.disabled = true;
+  btn.textContent = 'Analyzing...';
+  out.className = 'ai-output';
+  out.textContent = 'Fetching latest SEC filings, news, and market data...';
+
+  ['meter-sec','meter-news','meter-fin','meter-mkt'].forEach(id => {
+    document.getElementById(id).textContent = '⏳';
+  });
+
+  const prompt = `You are analyzing NuScale Power (NYSE: SMR) to generate an investment signal.
+
+Please analyze ALL of the following dimensions:
+
+1. SEC FILINGS: Review the latest 10-K/10-Q/8-K filings. What do recent filings reveal about financial health, cash position, and business developments?
+
+2. NEWS FLOW: What are the most recent significant news events for NuScale Power? Include any contract announcements, partnerships, regulatory updates, or executive moves from the past 1-3 months.
+
+3. FINANCIAL METRICS: Based on FY2024 data — Revenue $37M (+62% YoY), Net Loss -$348M, Cash Runway 3.7 years, Cash Burn $108.7M/yr. Is the trajectory improving or worsening?
+
+4. MARKET CONTEXT: How is the broader SMR/nuclear energy market performing? Any macro tailwinds or headwinds?
+
+Then provide:
+- OVERALL SIGNAL: BUY / HOLD / WAIT / SELL (pick one)
+- SEC_SENTIMENT: bullish / neutral / bearish / mixed
+- NEWS_SENTIMENT: bullish / neutral / bearish / mixed
+- FINANCIAL_SENTIMENT: bullish / neutral / bearish / mixed
+- MARKET_SENTIMENT: bullish / neutral / bearish / mixed
+- REASONING: 4-5 bullet points explaining the signal
+- KEY CATALYST TO WATCH: The single most important upcoming event
+- PRICE CONTEXT: Current ~$12, analyst target $36.56 — is current price an opportunity or a trap?
+
+Format your response starting with a JSON block like this:
+{"signal":"BUY","sec":"bullish","news":"neutral","financial":"bearish","market":"bullish"}
+Then provide the full analysis below.`;
+
+  try {
+    const res = await fetch('/api/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        system: SYSTEM,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+
+    const text = data.text;
+
+    // Parse JSON signal
+    const jsonMatch = text.match(/\{[^}]+\}/);
+    if (jsonMatch) {
+      try {
+        const parsed = JSON.parse(jsonMatch[0]);
+        setOverallSignal(parsed.signal || 'HOLD');
+        setSignalMeter('meter-sec', 'meter-sec-label', parsed.sec || 'neutral');
+        setSignalMeter('meter-news', 'meter-news-label', parsed.news || 'neutral');
+        setSignalMeter('meter-fin', 'meter-fin-label', parsed.financial || 'neutral');
+        setSignalMeter('meter-mkt', 'meter-mkt-label', parsed.market || 'neutral');
+      } catch(e) {}
+    }
+
+    out.textContent = text.replace(/\{[^}]+\}\n?/, '').trim();
+    out.className = 'ai-output';
+
+  } catch(e) {
+    out.textContent = 'Error: ' + e.message;
+  }
+
+  btn.disabled = false;
+  btn.textContent = '⚡ Run Full Signal Analysis →';
+}
+
+async function runQuickSignal(type) {
+  const out = document.getElementById('quick-signal-output');
+  out.className = 'ai-output';
+  out.textContent = 'Analyzing...';
+
+  const prompts = {
+    sec:      "Search for and analyze the most recent SEC filings (10-Q, 8-K) from NuScale Power. What are the key takeaways for investors? Any red flags or positive developments?",
+    news:     "What are the most recent news headlines about NuScale Power (SMR)? Analyze their market impact — bullish, bearish, or neutral? Include approximate dates.",
+    catalyst: "What are the top 3 upcoming catalysts for NuScale Power in the next 3-6 months? Rate each catalyst's potential impact on the stock price.",
+    risk:     "Assess NuScale Power's current risk level across: financial risk, regulatory risk, execution risk, and competitive risk. Give an overall risk rating (Low/Medium/High/Very High) with justification.",
+    compare:  "Compare the current investment signal for NuScale Power (SMR) vs Oklo (OKLO). Which is more attractive right now and why? Consider risk/reward for each."
+  };
+
+  try {
+    const res = await fetch('/api/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        system: SYSTEM,
+        messages: [{ role: 'user', content: prompts[type] }]
+      })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    out.textContent = data.text;
+    out.className = 'ai-output';
+  } catch(e) {
+    out.textContent = 'Error: ' + e.message;
+  }
+}
+
+function addSignalLog() {
+  const badge = document.getElementById('signal-badge');
+  const date = document.getElementById('signal-date');
+  if (badge.textContent === '— PENDING') {
+    alert('Please run a signal analysis first!');
+    return;
+  }
+  const entry = {
+    signal: badge.textContent,
+    date: new Date().toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}),
+    price: '~$12',
+    note: document.getElementById('signal-output').textContent.slice(0, 120) + '...'
+  };
+  signalLog.unshift(entry);
+
+  const logEl = document.getElementById('signal-log');
+  logEl.innerHTML = signalLog.map(e => `
+    <div style="border-bottom:1px solid var(--border);padding:12px 0;display:flex;gap:14px;align-items:flex-start;">
+      <div style="font-size:13px;font-weight:500;min-width:90px;">${e.signal}</div>
+      <div>
+        <div style="font-size:11px;color:var(--muted);font-family:'IBM Plex Mono',monospace;margin-bottom:4px;">${e.date} · Price: ${e.price}</div>
+        <div style="font-size:13px;color:var(--text);">${e.note}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function runMarketAI(q) {
+  const el = document.getElementById('market-ai-output');
+  const btn = document.getElementById('market-btn');
+  el.className = 'ai-output';
+  el.textContent = 'Analyzing market...';
+  if (btn) btn.disabled = true;
+  try {
+    const res = await fetch('/api/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        system: SYSTEM + `\n\nAdditional Market Context:\n- Global SMR market: $6.5B (2025) → $23B+ (2035), CAGR ~14% (multiple research firms)\n- Data center electricity demand: 460 TWh (2022) → 1,300 TWh (2035) - IEA/Goldman Sachs\n- Goldman Sachs: 85-90 GW new nuclear needed by 2030 for data center demand\n- Big Tech nuclear deals: Microsoft (835MW TMI), Google (500MW Kairos), Amazon (5GW X-Energy), Meta (1-4GW RFP)\n- Wood Mackenzie: 47 GW global SMR development pipeline, >50% in US\n- COP28: Triple global nuclear capacity by 2050 pledge\n- China Linglong One SMR: first commercial onshore SMR, 2026\n- NuScale TVA+ENTRA1: up to 6 GW SMR capacity agreement`,
+        messages: [{ role: 'user', content: q }]
+      })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    el.textContent = data.text;
+    el.className = 'ai-output';
+  } catch(e) {
+    el.textContent = 'Error: ' + e.message;
+  }
+  if (btn) btn.disabled = false;
+}
+
+async function runELI5(tab) {
+  const outputs = { overview: 'eli5-output', peer: 'eli5-peer', valuation: 'eli5-valuation', market: 'eli5-market' };
+  const el = document.getElementById(outputs[tab]);
+  el.style.display = 'block';
+  el.className = 'eli5-box';
+  el.textContent = 'Generating explanation...';
+
+  const prompts = {
+    overview: "Explain NuScale Power's financial situation as if talking to a complete beginner. No jargon, use everyday analogies. 3-4 sentences max.",
+    peer: "Compare NuScale, Oklo, GE Vernova, BWX Technologies, and Centrus Energy as if they were different types of local businesses. One line per company, keep it simple.",
+    valuation: "Explain whether NuScale's stock is cheap or expensive right now, like you're explaining to someone who has never invested before. No finance jargon. 3-4 sentences.",
+    market: "Explain why the SMR (small nuclear reactor) market is suddenly booming and how it connects to AI, in plain everyday language anyone can understand. 3-4 sentences."
+  };
+
+  try {
+    const res = await fetch('/api/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        system: SYSTEM + '\n\nRespond in English only. Use simple everyday language. No financial jargon. Use analogies and comparisons to everyday life.',
+        messages: [{ role: 'user', content: prompts[tab] }]
+      })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    el.textContent = data.text;
+  } catch(e) {
+    el.textContent = 'Error: ' + e.message;
+  }
+}
+async function runValuation() {
+  await runValuationQ("Provide a comprehensive valuation analysis of NuScale Power (SMR) at current price ~$12 and market cap ~$3.7B. Include P/S ratio analysis, bull/bear price targets, and key valuation drivers. Compare to GE Vernova, BWXT, and Centrus.");
+}
+
+function setDCFScenario(type) {
+  const scenarios = {
+    bear:  { growth: 30,  terminal: 2,   wacc: 15, margin: 10 },
+    base:  { growth: 80,  terminal: 3,   wacc: 12, margin: 20 },
+    bull:  { growth: 150, terminal: 4,   wacc: 10, margin: 30 }
+  };
+  const s = scenarios[type];
+  document.getElementById('sl-growth').value   = s.growth;
+  document.getElementById('sl-terminal').value = s.terminal;
+  document.getElementById('sl-wacc').value     = s.wacc;
+  document.getElementById('sl-margin').value   = s.margin;
+  updateDCF();
+}
+
+function updateDCF() {
+  const growth   = parseFloat(document.getElementById('sl-growth').value) / 100;
+  const terminal = parseFloat(document.getElementById('sl-terminal').value) / 100;
+  const wacc     = parseFloat(document.getElementById('sl-wacc').value) / 100;
+  const margin   = parseFloat(document.getElementById('sl-margin').value) / 100;
+  const shares   = 318;
+  const baseRev  = 37;
+
+  document.getElementById('lbl-growth').textContent   = Math.round(growth * 100) + '%';
+  document.getElementById('lbl-terminal').textContent = (terminal * 100).toFixed(1) + '%';
+  document.getElementById('lbl-wacc').textContent     = (wacc * 100).toFixed(1) + '%';
+  document.getElementById('lbl-margin').textContent   = Math.round(margin * 100) + '%';
+
+  const slowGrowth = growth * 0.4;
+  const revenues = [];
+  let rev = baseRev;
+  for (let i = 1; i <= 10; i++) {
+    const g = i <= 5 ? growth : slowGrowth;
+    rev = rev * (1 + g);
+    revenues.push(rev);
+  }
+
+  const fcfs = revenues.map((r, i) => {
+    const m = margin * ((i + 1) / 10);
+    return r * m;
+  });
+
+  let npv = 0;
+  fcfs.forEach((fcf, i) => { npv += fcf / Math.pow(1 + wacc, i + 1); });
+
+  const terminalFCF = fcfs[9] * (1 + terminal);
+  const terminalValue = terminalFCF / (wacc - terminal);
+  const pvTerminal = terminalValue / Math.pow(1 + wacc, 10);
+  const totalValue = npv + pvTerminal;
+  const fairPrice = totalValue / shares * 1000;
+  const upside = ((fairPrice / 12) - 1) * 100;
+  const color = fairPrice >= 12 ? '#2ecc71' : '#e74c3c';
+
+  document.getElementById('dcf-price').textContent = '$' + Math.round(fairPrice);
+  document.getElementById('dcf-price').style.color = color;
+  document.getElementById('dcf-vs').textContent = 'vs current ~$12 (' + (upside >= 0 ? '+' : '') + Math.round(upside) + '%)';
+  document.getElementById('dcf-vs').style.color = color;
+  document.getElementById('dcf-rev5').textContent  = '$' + Math.round(revenues[4]) + 'M';
+  document.getElementById('dcf-rev10').textContent = '$' + (revenues[9] >= 1000 ? (revenues[9]/1000).toFixed(1)+'B' : Math.round(revenues[9])+'M');
+  document.getElementById('dcf-tv').textContent    = '$' + (pvTerminal >= 1000 ? (pvTerminal/1000).toFixed(1)+'B' : Math.round(pvTerminal)+'M');
+  document.getElementById('dcf-upside').textContent = (upside >= 0 ? '+' : '') + Math.round(upside) + '%';
+  document.getElementById('dcf-upside').style.color = color;
+
+  const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const gridColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+  const tickColor = '#6b7f96';
+  const existing = Chart.getChart('cv-dcf');
+  if (existing) existing.destroy();
+  new Chart(document.getElementById('cv-dcf'), {
+    type: 'bar',
+    data: {
+      labels: ['Yr1','Yr2','Yr3','Yr4','Yr5','Yr6','Yr7','Yr8','Yr9','Yr10'],
+      datasets: [
+        { label: 'Revenue ($M)', data: revenues.map(r => Math.round(r)), backgroundColor: '#3d9bff' },
+        { label: 'FCF ($M)', data: fcfs.map(f => Math.round(f)), backgroundColor: '#2ecc71' }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { color: gridColor }, ticks: { color: tickColor, font: { size: 11 } } },
+        y: { grid: { color: gridColor }, ticks: { color: tickColor, font: { size: 11 }, callback: v => '$' + v + 'M' } }
+      }
+    }
+  });
+}
+
+async function runValuationQ(q) {
+  const el = document.getElementById('val-output');
+  const btn = document.getElementById('val-btn');
+  el.className = 'ai-output';
+  el.textContent = 'Analyzing valuation...';
+  if (btn) btn.disabled = true;
+  try {
+    const res = await fetch('/api/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ system: SYSTEM, messages: [{ role: 'user', content: q }] })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    el.textContent = data.text;
+    el.className = 'ai-output';
+  } catch(e) {
+    el.textContent = 'Error: ' + e.message;
+  }
+  if (btn) btn.disabled = false;
+}
+
+async function runNews(query) {
+  const el = document.getElementById('news-output');
+  const titleEl = document.getElementById('news-title');
+  const tsEl = document.getElementById('news-timestamp');
+  el.className = 'ai-output';
+  el.textContent = 'Searching latest news...';
+  tsEl.style.display = 'none';
+
+  const prompt = `Search for the latest news about: "${query}"
+
+Please provide:
+1. **3-5 key recent developments** (with approximate dates if available)
+2. **Market/investment impact** — how does this news affect the company's outlook?
+3. **Catalyst assessment** — is this bullish, bearish, or neutral for the stock?
+4. **What to watch next** — upcoming events or milestones investors should monitor
+
+Be specific with company names, deal sizes, and dates. Format clearly with headers.`;
+
+  try {
+    const res = await fetch('/api/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        system: SYSTEM + '\n\nYou also have access to current news through your training. Provide the most recent information available about the queried topic, clearly noting if information may be from your training cutoff.',
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    titleEl.textContent = 'AI News Analysis — ' + query.split(' ').slice(0,3).join(' ');
+    tsEl.textContent = new Date().toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
+    tsEl.style.display = 'inline';
+    el.textContent = data.text;
+  } catch(e) {
+    el.textContent = 'Error: ' + e.message;
+  }
+}
+
+function runNewsCustom() {
+  const q = document.getElementById('news-input').value.trim();
+  if (!q) return;
+  runNews(q);
+}
+
+async function streamClaude(prompt, outputEl, btn) {
+  outputEl.className = 'ai-output';
+  outputEl.textContent = 'Analyzing...';
+  if (btn) btn.disabled = true;
+
+  try {
+    const res = await fetch('/api/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        system: SYSTEM,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    outputEl.textContent = data.text;
+
+  } catch(e) {
+    outputEl.textContent = 'Error: ' + e.message;
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+async function runOverview() {
+  const el = document.getElementById('overview-output');
+  const btn = document.getElementById('overview-btn');
+  await streamClaude(
+    "Provide a concise executive summary of NuScale Power's financial health and strategic position based on their FY2022-2024 10-K data. Focus on key trends, risks, and opportunities.",
+    el, btn
+  );
+}
+
+function setQ(q) { document.getElementById('ai-input').value = q; }
+
+async function runAI() {
+  const q = document.getElementById('ai-input').value.trim();
+  if (!q) return;
+  await streamClaude(q, document.getElementById('ai-output'), document.getElementById('ai-btn'));
+}
+
+let secFilings = [];
+
+async function loadSEC(type) {
+  const el = document.getElementById('sec-list');
+  el.innerHTML = '<div style="color:var(--muted);font-size:13px;font-style:italic;">Loading from SEC EDGAR...</div>';
+
+  ['10-K','10-Q','8-K','ALL'].forEach(t => {
+    const btn = document.getElementById('btn-' + t.toLowerCase().replace('-','').replace('all','all'));
+    if (btn) btn.style.borderColor = '';
+  });
+
+  try {
+    const res = await fetch(`/api/sec?type=${type}`);
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+
+    secFilings = data.filings;
+
+    if (secFilings.length === 0) {
+      el.innerHTML = '<div style="color:var(--muted);font-size:13px;">No filings found for this type.</div>';
+      return;
+    }
+
+    el.innerHTML = secFilings.map((f, i) => `
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);gap:12px;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <span class="pill ${f.form === '10-K' ? 'pill-green' : f.form === '10-Q' ? 'pill-amber' : 'pill-red'}">${f.form}</span>
+          <div>
+            <div style="font-size:13px;font-weight:500;color:var(--text);">${f.description}</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px;font-family:'IBM Plex Mono',monospace;">Filed: ${f.date}</div>
+          </div>
+        </div>
+        <a href="${f.url}" target="_blank" style="font-size:12px;color:var(--accent);text-decoration:none;white-space:nowrap;">View →</a>
+      </div>
+    `).join('');
+
+    document.getElementById('sec-input').placeholder = `e.g. Summarize the latest ${secFilings[0].form} filing from ${secFilings[0].date}`;
+
+  } catch(e) {
+    el.innerHTML = `<div style="color:var(--red);font-size:13px;">Error: ${e.message}</div>`;
+  }
+}
+
+async function runSecAI() {
+  const q = document.getElementById('sec-input').value.trim();
+  if (!q) return;
+  const el = document.getElementById('sec-output');
+  const btn = document.getElementById('sec-btn');
+
+  const context = secFilings.length > 0
+    ? `Recent SEC filings for NuScale Power (SMR): ${JSON.stringify(secFilings.slice(0,5))}. User question: ${q}`
+    : q;
+
+  el.className = 'ai-output';
+  el.textContent = 'Analyzing...';
+  btn.disabled = true;
+
+  try {
+    const res = await fetch('/api/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        system: SYSTEM,
+        messages: [{ role: 'user', content: context }]
+      })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    el.textContent = data.text;
+  } catch(e) {
+    el.textContent = 'Error: ' + e.message;
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+window.addEventListener('load', async () => {
+  initCharts();
+  await loadLatestSignalFromDB();
+  await loadLatestFilingBadge();
+});
+
+async function loadLatestSignalFromDB() {
+  try {
+    const res = await fetch('/api/data?type=signal');
+    const data = await res.json();
+    if (data.signal) {
+      setOverallSignal(data.signal.signal || 'HOLD');
+      setSignalMeter('meter-sec', 'meter-sec-label', data.signal.sec_sentiment || 'neutral');
+      setSignalMeter('meter-news', 'meter-news-label', data.signal.news_sentiment || 'neutral');
+      setSignalMeter('meter-fin', 'meter-fin-label', data.signal.financial_sentiment || 'neutral');
+      setSignalMeter('meter-mkt', 'meter-mkt-label', data.signal.market_sentiment || 'neutral');
+      const out = document.getElementById('signal-output');
+      out.className = 'ai-output';
+      out.textContent = data.signal.analysis || '';
+      document.getElementById('signal-date').textContent =
+        'Auto-updated: ' + new Date(data.signal.created_at).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
+    }
+  } catch(e) {
+    console.log('No cached signal yet:', e.message);
+  }
+}
+
+async function loadLatestFilingBadge() {
+  try {
+    const res = await fetch('/api/data?type=latest_filing');
+    const data = await res.json();
+    if (data.filing) {
+      const badge = document.getElementById('signal-price');
+      if (badge) {
+        badge.textContent = `Latest filing: ${data.filing.form_type} (${data.filing.filed_date}) · ${data.filing.sentiment || 'neutral'}`;
+      }
+    }
+  } catch(e) {
+    console.log('No cached filing yet:', e.message);
+  }
+}
+
+</script>
+</body>
+</html>
